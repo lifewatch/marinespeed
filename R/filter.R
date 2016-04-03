@@ -2,11 +2,13 @@
 
 #' Filter points based on distance to other points
 #'
+#' @usage
+#' geographic_filter(data, filter_data, lonlat = TRUE, bufferdistance=200*1000)
 #'
 #' @param data
 #' @param filter_data
+#' @param lonlat
 #' @param bufferdistance
-#' @param distfun
 #'
 #' @return Vector of integer with the indexes of the rows in data that are not within bufferdistance of the filter_data.
 #'
@@ -15,7 +17,8 @@
 #' # TODO
 #'
 #' @export
-geographic_filter <- function(data, filter_data, bufferdistance=200*1000, distfun = geosphere::distGeo) {
+geographic_filter <- function(data, filter_data, lonlat = TRUE, bufferdistance=200*1000) {
+  distfun <- get_distfun(lonlat)
   data <- as.matrix(data[,1:2])
   filter_data <- as.matrix(filter_data[,1:2])
   removed <- c()
