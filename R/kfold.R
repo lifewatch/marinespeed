@@ -1,41 +1,61 @@
-
-get_species_training_fold <- function(scientific_name, data, folds, k) {
-  d <- data[folds[folds$species == scientific_name,paste0("k",k)],]
-  d
-}
-get_species_test_fold <- function(species_name, data, folds, k) {
-  d <- data[!folds[folds$species,paste0("k",k)],]
-  d
-}
-get_background_training_fold <- function(species, data, folds, k) {
-  f <- folds[folds$species == "background" | folds$species == species$ScientificName,paste0("k",k)]
+#' Get the data associated with a fold
+#'
+#' \code{get_fold_data} returns rows from data for a specific species for the kth fold
+#'
+#' @usage get_fold_data(species_name, data, folds, k, training)
+#'
+#' @param species_name Character vector. The name of the species you want get the fold data for.
+#' @param data Dataframe. The occurrence or background data you want to get the fold data for.
+#' @param folds Dataframe. The occurrence or background folds as created by \code{kfold_species_background}. Essentially a data.frame with a species column and the k-fold cross-validation logical vectors.
+#' @param k Integer. Indicate which kth fold you want to return data for.
+#' @param training Logical. If \code{TRUE} then training data is returned else if \code{FALSE} then test data is returned.
+#'
+#' @return Filtered version of data.
+#'
+#' @examples
+#' set.seed(42)
+#' occurrence_data <- data.frame(species = rep("Abalistes stellatus", 50), longitude = runif(50, -180, 180), latitude = runif(50, -90, 90))
+#' background_data <- data.frame(species = rep("background", 10000), longitude = runif(1000, -180, 180), latitude = runif(1000, -90, 90))
+#' folds <- kfold_occurrence_background(occurrence_data, background_data)
+#'
+#' ## TODO replace above with download of the MarineSPEED occurrence data and fold data
+#'
+#' ## get training and test data for the first fold
+#' occ_training <- get_fold_data("Abalistes stellatus", occurrence_data, folds, k = 1, training = TRUE)
+#' occ_test <- get_fold_data("Abalistes stellatus", occurrence_data, folds, k = 1, training = FALSE)
+#'
+#' background_training <- get_fold_data("Abalistes stellatus", background_data, folds, k = 1, training = TRUE)
+#' background_test <- get_fold_data("Abalistes stellatus", background_data, folds, k = 1, training = FALSE)
+#' ## TODO refactor/change to make it easier/less typing for the user (higher level API)
+#' @export
+get_fold_data <- function(species_name, data, folds, k, training) {
+  kcol <- paste0("k",k)
+  if(!(kcol %in% colnames(folds))) {
+    stop("k not found in folds")
+  }
+  filter <- c(species_name, "background")
+  f <- folds[folds$species %in% filter, kcol] == istraining
   d <- data[f & !is.na(f),] ## handle NA's (from e.g. pseudo-disc background)
   d
 }
-get_background_test_fold <- function(species, data, folds, k) {
-  f <- folds[folds$species == "background" | folds$species == species$ScientificName,paste0("k",k)]
-  d <- data[!f & !is.na(f),] ## handle NA's (from e.g. pseudo-disc background)
-  d
-}
 
-
-#' Create k folds of species and background data for cross-validation
+#' Create k folds of occurrence and background data for cross-validation
 #'
-#' \code{kfold_species_background} creates a k-fold partitioning of species and background data for cross-validation using random and stratified folds.
-#' Returns a list with the species folds and the background folds, folds are represented as TRUE/FALSE/NA columns of a dataframe, 1 column for each fold.
+#' \code{kfold_occurrence_background} creates a k-fold partitioning of occurrence and background data for cross-validation using random and stratified folds.
+#' Returns a list with the occurrence folds and the background folds, folds are represented as TRUE/FALSE/NA columns of a dataframe, 1 column for each fold.
 #'
 #' @usage
-#' kfold_species_background(species_data, background_data, fold_type = "disc", k = 5, pwd_sample = TRUE, background_buffer = 200*1000, distfun = geosphere::distGeo)
+#' kfold_occurrence_background(occurrence_data, background_data, fold_type = "disc", k = 5, pwd_sample = TRUE, background_buffer = 200*1000, distfun = geosphere::distGeo)
 #'
-#' @param occurrence_data matrix or dataframe. Occurrence points of the species, the first column should be the scientific name of the species followed by two columns representing the longitude and latitude (or x,y coordinates if \code{lonlat = FALSE}).
-#' @param background_data matrix or dataframe. Background data points, the first two columns should represent the longitude and latitude (or x,y coordinates if \code{lonlat = FALSE}).
-#' @param occurrence_fold_type character. How occurrence folds should be generated, currently \code{"disc"} (see \code{\link{kfold_disc}}) and \code{"random"} are supported.
-#' @param k integer. The number of folds (partitions) that have to be created. By default 5 folds are created.
-#' @param pwd_sample logical. Whether backgound points should be picked by doing pair-wise distance sampling (see \code{\link[dismo]{pwdSample}}). It is recommended to install the FNN package if you want to do pair-wise distance sampling.
-#' @param background_buffer numeric. Distance in meters around species test points where background data should be excluded from.
-#' @param distfun function. Distance function to calculate distances between a point and an other matrix or dataframe of points. By default the \code{geosphere::distGeo} function is used.
+#' @param occurrence_data Dataframe. Occurrence points of the species, the first column should be the scientific name of the species followed by two columns representing the longitude and latitude (or x,y coordinates if \code{lonlat = FALSE}).
+#' @param background_data Dataframe. Background data points, the first column is a dummy column followed by two columns representing the longitude and latitude (or x,y coordinates if \code{lonlat = FALSE}).
+#' @param occurrence_fold_type Character vector. How occurrence folds should be generated, currently \code{"disc"} (see \code{\link{kfold_disc}}) and \code{"random"} are supported.
+#' @param k Integer. The number of folds (partitions) that have to be created. By default 5 folds are created.
+#' @param pwd_sample Logical. Whether backgound points should be picked by doing pair-wise distance sampling (see \code{\link[dismo]{pwdSample}}). It is recommended to install the FNN package if you want to do pair-wise distance sampling.
+#' @param lonlat Logical. If \code{TRUE} (default) then Great Circle distances are calculated else if \code{FALSE} Euclidean (planar) distances are calculated.
+#' @param background_buffer Numeric. Distance in meters around species test points where background data should be excluded from.
 #'
-#' @return A list with 2 dataframes, species and background, with as first column the scientifc name or \code{"background"} and k columns containing \code{TRUE}, \code{FALSE} or \code{NA}.
+#' @return A list with 2 dataframes, \code{occurrence} and \code{background}, with as first column the scientifc name or \code{"background"} and k columns containing \code{TRUE}, \code{FALSE} or \code{NA}.
 #'
 #' @details
 #' Note that which and how many background points get selected in each fold depends on the \code{fold_type}, \code{pwd_sample} and the \code{background_buffer} and
@@ -50,45 +70,49 @@ get_background_test_fold <- function(species, data, folds, k) {
 #'
 #' @seealso \code{\link{kfold_disc}} \code{\link{geographic_filter}} \code{\link[dismo]{pwdSample}}
 #' @examples
-#'
-#' ## TODO examples kfold_species_background
+#' set.seed(42)
+#' occurrence_data <- data.frame(species = rep("Abalistes stellatus", 50), longitude = runif(50, -180, 180), latitude = runif(50, -90, 90))
+#' background_data <- data.frame(species = rep("background", 10000), longitude = runif(1000, -180, 180), latitude = runif(1000, -90, 90))
+#' disc_folds <- kfold_occurrence_background(occurrence_data, background_data, "disc")
+#' random_folds <- kfold_occurrence_background(occurrence_data, background_data, "random", pwd_sample = FALSE, background_buffer = 0)
 #'
 #' @export
-kfold_species_background <- function(occurrence_data, background_data, occurrence_fold_type = "disc", k = 5, pwd_sample = TRUE, lonlat = TRUE, background_buffer = 200*1000) {
-  #' 1) partition species presences with pseudo-discs (1st fold = real disc, other folds = )
-  #' 2) select testing background points with pairwise distance sampling (pwdSample) to reduce spatial sorting bias
-  #' 3) select training background points by filtering background points that are within background_buffer distance of the points in the training fold
-  #' 4) make sure training and testing background are different
-  #' 5) set NA background points that are not in the training and not in the testing set
+kfold_occurrence_background <- function(occurrence_data, background_data, occurrence_fold_type = "disc", k = 5, pwd_sample = TRUE, lonlat = TRUE, background_buffer = 200*1000) {
+  # 1) partition species presences with pseudo-discs (1st fold = real disc, other folds = )
+  # 2) select testing background points with pairwise distance sampling (pwdSample) to reduce spatial sorting bias
+  # 3) select training background points by filtering background points that are within background_buffer distance of the points in the training fold
+  # 4) make sure training and testing background are different
+  # 5) set NA background points that are not in the training and not in the testing set
   if(!pwd_sample) {
     background_partitions <- dismo::kfold(background_data, k)
   }
-  if(fold_type == "disc") {
+  if(occurrence_fold_type == "disc") {
     occurrence_partitions <- kfold_disc(occurrence_data[,2:3], k, lonlat)
-  } else if (fold_type == "random") {
+  } else if (occurrence_fold_type == "random") {
     occurrence_partitions <- dismo::kfold(occurrence_data, k)
   } else {
     stop("Unknown fold type")
   }
-  occurrence_folds <- data.frame(species = occurrence_data[,1]) ## first column with scientific name
-  background_folds <- data.frame(species = rep("background", NROW(background_data)))
+  occurrence_folds <- data.frame(species = occurrence_data[,1], stringsAsFactors = is.factor(occurrence_data[,1])) ## first column with scientific name
+  background_folds <- data.frame(species = rep("background", NROW(background_data)), stringsAsFactors = is.factor(occurrence_data[,1]))
   for(ki in 1:k) {
     ## training folds
     occurrence_folds[,paste0("k",ki)] <- occurrence_partitions != ki
 
-    occurrence_test <- occurrence_data[occurrence_partitions == ki, 1:2]
-    occurrence_training <- occurrence_data[occurrence_partitions != ki, 1:2]
+    occurrence_test <- occurrence_data[occurrence_partitions == ki, 2:3]
+    occurrence_training <- occurrence_data[occurrence_partitions != ki, 2:3]
 
     if(pwd_sample) {
-      test_sample <- pwdSample(occurrence_test, background_data[,1:2], occurrence_training, n=5) ## try to get 5 background points for each testing presence point, you'll get less than that
+      test_sample <- pwdSample(occurrence_test, background_data[,2:3], occurrence_training, n=5) ## try to get 5 background points for each testing presence point, you'll get less than that
     } else {
-      test_sample <- which(background_partitions==k) ## use randomly generated partitions
+      test_sample <- which(background_partitions==ki) ## use randomly generated partitions
     }
     background_test_i <- unique(na.omit(as.vector(test_sample)))
-    background_training_i <- base::setdiff(background_training_i, background_test_i)
+    background_training_i <- base::setdiff(1:NROW(background_data), background_test_i)
 
     if(background_buffer > 0) {
-      background_training_i <- geographic_filter(background_data[background_training_i,], occurrence_test, lonlat, background_buffer)
+      filtered <- geographic_filter(background_data[background_training_i,2:3], occurrence_test, lonlat, background_buffer)
+      background_training_i <- (1:NROW(background_data))[background_training_i][filtered]
     }
 
     na_i <- setdiff(1:NROW(background_data), c(background_training_i,background_test_i))
@@ -110,7 +134,7 @@ kfold_species_background <- function(occurrence_data, background_data, occurrenc
 #'
 #' @param data Matrix or dataframe. The first two columns should represent the longitude and latitude (or x,y coordinates if \code{lonlat = FALSE}).
 #' @param k Integer. The number of folds (partitions) that have to be created. By default 5 folds are created.
-#' @param lonlat Logical. If \code{TRUE} (default) then Great Circle distances are calculated else Euclidean (planar) distances are calculated.
+#' @param lonlat Logical. If \code{TRUE} (default) then Great Circle distances are calculated else if \code{FALSE} Euclidean (planar) distances are calculated.
 #'
 #' @return A vector with fold numbers ranging from 1 to k.
 #'
@@ -165,6 +189,8 @@ kfold_disc <- function(data, k = 5, lonlat = TRUE) {
 }
 
 #' plot folds
+#'
+#' \code{plot_folds} makes a rudimentary plot of the data and the folds created with e.g. \code{\link{kfold_disc}} or \code{\link[dismo]{kfold}}.
 #'
 #' @usage
 #' plot_folds(data, folds)

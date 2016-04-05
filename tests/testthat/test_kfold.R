@@ -2,64 +2,155 @@ library(marinespeed)
 
 context("kfold")
 
-lonlat_data <- function(nrow=50, seed=42) {
+lonlat_data <- function(species=NULL, nrow=50, seed=42, stringsAsFactors = TRUE) {
   set.seed(seed)
-  lonlat <- cbind(lon=runif(nrow, -180, 180), lat=runif(nrow, -90, 90))
+  if(!is.null(species)) {
+    lonlat <- data.frame(species=rep(species, nrow), stringsAsFactors = stringsAsFactors)
+  } else {
+    lonlat <- data.frame(row.names = 1:nrow)
+  }
+  lonlat[,"longitude"] <- runif(nrow, -180, 180)
+  lonlat[,"latitude"] <- runif(nrow, -90, 90)
   lonlat
 }
-
 
 test_that("kfold disc returns a vector of valid folds", {
   fold_lengths <- function(folds, k=5) {
     sapply(1:5, function(k) sum(folds==k))
   }
   d <- lonlat_data(nrow=50)
+  set.seed(42)
   folds <- kfold_disc(d, k=5)
   lengths <- fold_lengths(folds, k=5)
   expect_identical(sum(lengths), 50)
   expect_identical(max(lengths) - min(lengths), 0)
 
   d <- lonlat_data(nrow=49)
+  set.seed(42)
   folds <- kfold_disc(d, k=5)
   lengths <- fold_lengths(folds, k=5)
   expect_identical(sum(lengths), 49)
   expect_identical(max(lengths) - min(lengths), 1)
 })
 
-test_that("kfold disc works with alternative distance function", {
-  euclidean <- function(a, b) sqrt(sum((rep(a,NROW(b)) - b) ^ 2))
-
+test_that("kfold disc works with lonlat=FALSE works", {
   d <- lonlat_data(nrow=50)
-  folds <- kfold_disc(d, k=5, distfun = euclidean)
+  set.seed(42)
+  folds <- kfold_disc(d, k=5, lonlat = FALSE)
+  set.seed(42)
+  folds2 <- kfold_disc(d, k=5, lonlat = FALSE)
+  set.seed(42)
+  folds_lonlat <- kfold_disc(d, k=5, lonlat = TRUE)
+  expect_identical(folds, folds2) ## should be the same
+  expect_false(identical(folds, folds_lonlat)) ## should be different
   lengths <- fold_lengths(folds, k=5)
   expect_identical(sum(lengths), 50)
   expect_identical(max(lengths) - min(lengths), 0)
 })
 
-test_that("kfold_disc different seed, different result, no seed, different result", {
-  d <- lonlat_data(nrow=20)
-  fold42a <- kfold_disc(d, k=5)
-  fold42b <- kfold_disc(d, k=5)
-  fold1a <- kfold_disc(d, k=5, seed=1)
-  fold1b <- kfold_disc(d, k=5, seed=1)
-  foldNULL <- kfold_disc(d, k=5, seed=NULL)
-  foldNA1 <- kfold_disc(d, k=5, seed=NA)
-  foldNA2 <- kfold_disc(d, k=5, seed=NA)
-  expect_identical(fold42a, fold42b)
-  expect_false(identical(fold42a, fold1a))
-  expect_identical(fold1a, fold1b)
-  expect_false(identical(foldNULL, foldNA1))
-  expect_false(identical(foldNA1, foldNA2))
-})
+validate_folds <- function(folds) {
+  occ <- folds$occurrence
+  ## each point in occurrence only once in test set
+  expect_true(all(rowSums(occ[,2:ncol(occ)]) == (ncol(occ) - 2)))
+}
 
 test_that("kfold_species_background with default settings works", {
-  species <- lonlat_data(nrow=20)
-  background <- lonlat_data(nrow=200)
+  occurrence_data <- lonlat_data("Testis testatus", nrow=20)
+  background_data <- lonlat_data("background", nrow=200, seed = 21)
+  set.seed(42)
+  folds <- kfold_occurrence_background(occurrence_data, background_data)
+  expect_equal(NROW(folds$occurrence), 20)
+  expect_equal(NROW(folds$background), 200)
+  expect_true(is.factor(folds$occurrence[1,1]))
+  expect_equal(as.character(folds$occurrence[1,1]), "Testis testatus")
+  expect_equal(as.character(folds$background[1,1]), "background")
+  expect_equal(NCOL(folds$occurrence), 6)
+  expect_equal(NCOL(folds$background), 6)
+  validate_folds(folds)
 
-  folds <- kfold_species_background(species, background)
-  ## TODO add expect...
+  occurrence_data <- lonlat_data("Testis testatus", nrow=20, stringsAsFactors = FALSE)
+  background_data <- lonlat_data("background", nrow=200, seed = 21,  stringsAsFactors = FALSE)
+  set.seed(42)
+  folds <- kfold_occurrence_background(occurrence_data, background_data)
+  expect_equal(folds$occurrence[1,1], "Testis testatus") ## should not be factor
+  expect_equal(folds$background[1,1], "background")
+  expect_false(is.factor(folds$occurrence[1,1]))
+  expect_false(is.factor(folds$background[1,1]))
+  validate_folds(folds)
 })
 
+test_that("kfold_species_background with different settings works", {
+  species <- lonlat_data("Testis testatus", nrow=50, stringsAsFactors = FALSE)
+  background <- lonlat_data("background", nrow=200, seed = 21, stringsAsFactors = FALSE)
+  ## default lonlat
+  set.seed(42)
+  folds1 <- kfold_occurrence_background(species, background)
+  set.seed(42)
+  folds2 <- kfold_occurrence_background(species, background, lonlat = TRUE)
+  expect_identical(folds1, folds2)
+  validate_folds(folds1)
+
+  ## lonlat = FALSE
+  set.seed(42)
+  folds3 <- kfold_occurrence_background(species, background, lonlat = FALSE)
+  expect_false(identical(folds1, folds3))
+  validate_folds(folds3)
+
+  ## pwd_sample = FALSE
+  set.seed(42)
+  folds4 <- kfold_occurrence_background(species, background, pwd_sample = FALSE)
+  expect_false(identical(folds1, folds4))
+  validate_folds(folds4)
+  expect_less_than(sum(complete.cases(folds4$background)), NROW(folds4$background))
+
+  ## occurrence_fold_type = "random"
+  set.seed(42)
+  folds5 <- kfold_occurrence_background(species, background, occurrence_fold_type = "random")
+  expect_false(identical(folds1, folds5))
+  validate_folds(folds5)
+  expect_less_than(sum(complete.cases(folds5$background)), NROW(folds5$background)) ## background points filtered out
+
+  ## background_buffer = 0
+  set.seed(42)
+  folds6 <- kfold_occurrence_background(species, background, occurrence_fold_type = "random", background_buffer = 0)
+  expect_false(identical(folds5, folds6))
+  validate_folds(folds6)
+  expect_equal(sum(complete.cases(folds6$background)), NROW(folds6$background)) ## no background buffer so point is either training or test
+
+  ## background_buffer = -1
+  set.seed(42)
+  folds7 <- kfold_occurrence_background(species, background, occurrence_fold_type = "random", background_buffer = -1)
+  expect_identical(folds6, folds7)
+  validate_folds(folds7)
+  expect_equal(sum(complete.cases(folds7$background)), NROW(folds7$background)) ## no background buffer so point is either training or test
+
+  ## random, pwd_sample = F, background_buffer = 0
+  set.seed(42)
+  folds8 <- kfold_occurrence_background(species, background, occurrence_fold_type = "random", background_buffer = 0, pwd_sample = FALSE)
+  expect_false(identical(folds6, folds8))
+  expect_equal(sum(complete.cases(folds8$background)), NROW(folds8$background))
+  validate_folds(folds8)
+
+  ## random, pwd_sample = F, background_buffer = 1000*1000
+  set.seed(42)
+  folds9 <- kfold_occurrence_background(species, background, occurrence_fold_type = "random", background_buffer = 1000*1000, pwd_sample = FALSE)
+  expect_less_than(sum(complete.cases(folds9$background)), sum(complete.cases(folds5$background)))
+  expect_equal(sum(folds9$background[,2:6]==FALSE, na.rm = TRUE), 200) ## expect 200 background test points when pwd_sample = FALSE
+  validate_folds(folds9)
+
+  ## huge background_buffer (no training background points selected)
+  set.seed(42)
+  folds9b <- kfold_occurrence_background(species, background, occurrence_fold_type = "random", background_buffer = 100000*1000, pwd_sample = FALSE)
+  expect_equal(sum(complete.cases(folds9b$background)), 0)
+  expect_equal(sum(folds9b$background[,2:6]==FALSE, na.rm = TRUE), 200) ## expect 200 background test points when pwd_sample = FALSE
+
+  ## k = 10
+  set.seed(42)
+  folds10 <- kfold_occurrence_background(species, background, k = 10, occurrence_fold_type = "random", background_buffer = 0, pwd_sample = FALSE)
+  expect_equal(NCOL(folds10$occurrence), 11)
+  expect_equal(NCOL(folds10$background), 11)
+  validate_folds(folds10)
+})
 
 plot_folds <- function(d, folds) {
   plot(d, pch=".")

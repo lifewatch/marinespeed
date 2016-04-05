@@ -9,8 +9,7 @@ get_distfun <- function(lonlat, dismo = FALSE) {
     if(dismo) {
       dismo_distPlane
     } else {
-      euclidean <- function(a, b) sqrt(sum((rep(a,NROW(b)) - b) ^ 2))
-      euclidean
+      dist_plane
     }
   }
 }
@@ -22,6 +21,11 @@ lonlat_xyz <- function(data, lonlat_cols) {
   r <- cbind(cos(lat)*cos(lon), cos(lat)*sin(lon), sin(lat))
   colnames(r) <- c("x", "y", "z")
   return(r)
+}
+
+dist_plane <- function(a, b) {
+  ## Euclidean distance from point to data.frame/matrix of points
+  sqrt((a[, 1] - b[, 1])^2 + (a[, 2] - b[, 2])^2)
 }
 
 dismo_distHaversine <- function(p1, p2) {
@@ -47,14 +51,11 @@ dismo_distGeo <- function(x, y) {
   return(dm)
 }
 dismo_distPlane <- function(x, y) {
-  dfun <- function(x, y) {
-    sqrt((x[, 1] - y[, 1])^2 + (x[, 2] - y[, 2])^2)
-  }
   n = nrow(x)
   m = nrow(y)
   dm = matrix(ncol = m, nrow = n)
   for (i in 1:n) {
-    dm[i, ] = dfun(x[i, , drop = FALSE], y)
+    dm[i, ] = dist_plane(x[i, , drop = FALSE], y)
   }
   return(dm)
 }
