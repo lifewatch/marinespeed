@@ -27,14 +27,14 @@
 #' background_training <- get_fold_data("Abalistes stellatus", background_data, folds, k = 1, training = TRUE)
 #' background_test <- get_fold_data("Abalistes stellatus", background_data, folds, k = 1, training = FALSE)
 #' ## TODO refactor/change to make it easier/less typing for the user (higher level API)
-#' @export
+# TODO export ? @export
 get_fold_data <- function(species_name, data, folds, k, training) {
   kcol <- paste0("k",k)
   if(!(kcol %in% colnames(folds))) {
     stop("k not found in folds")
   }
-  filter <- c(species_name, "background")
-  f <- folds[folds$species %in% filter, kcol] == istraining
+  filter <- c(as.character(species_name), "background")
+  f <- folds[as.character(folds$species) %in% filter, kcol] == istraining
   d <- data[f & !is.na(f),] ## handle NA's (from e.g. pseudo-disc background)
   d
 }
