@@ -7,25 +7,41 @@
 get_fold_data(species_name, data, folds, k, training)
 }
 \arguments{
-\item{species_name}{Character vector. The name of the species you want get the fold data for.}
+\item{species_name}{Character vector. The name of the species you want get
+the fold data for.}
 
-\item{data}{Dataframe. The occurrence or background data you want to get the fold data for.}
+\item{data}{Dataframe. The occurrence or background data you want to get the
+fold data for.}
 
-\item{folds}{Dataframe. The occurrence or background folds as created by \code{kfold_species_background}. Essentially a data.frame with a species column and the k-fold cross-validation logical vectors.}
+\item{folds}{Dataframe. The occurrence or background folds as created by
+\code{kfold_species_background}. Essentially a data.frame with a species
+column and the k-fold cross-validation logical vectors.}
 
 \item{k}{Integer. Indicate which kth fold you want to return data for.}
 
-\item{training}{Logical. If \code{TRUE} then training data is returned else if \code{FALSE} then test data is returned.}
+\item{training}{Logical. If \code{TRUE} then training data is returned else
+if \code{FALSE} then test data is returned.}
 }
 \value{
 Filtered version of data.
 }
 \description{
-\code{get_fold_data} returns rows from data for a specific species for the kth fold
+\code{get_fold_data} returns rows from data for a specific species for the
+kth fold
 }
 \examples{
+set.seed(42)
+occurrence_data <- data.frame(species = rep("Abalistes stellatus", 50), longitude = runif(50, -180, 180), latitude = runif(50, -90, 90))
+background_data <- data.frame(species = rep("background", 10000), longitude = runif(1000, -180, 180), latitude = runif(1000, -90, 90))
+folds <- kfold_occurrence_background(occurrence_data, background_data)
 
+## TODO replace above with download of the MarineSPEED occurrence data and fold data
 
+## get training and test data for the first fold
+occ_training <- get_fold_data("Abalistes stellatus", occurrence_data, folds, k = 1, training = TRUE)
+occ_test <- get_fold_data("Abalistes stellatus", occurrence_data, folds, k = 1, training = FALSE)
 
+background_training <- get_fold_data("Abalistes stellatus", background_data, folds, k = 1, training = TRUE)
+background_test <- get_fold_data("Abalistes stellatus", background_data, folds, k = 1, training = FALSE)
 }
 

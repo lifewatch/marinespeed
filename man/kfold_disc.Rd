@@ -7,18 +7,24 @@
 kfold_disc(data, k = 5, distfun = geosphere::distGeo)
 }
 \arguments{
-\item{data}{Matrix or dataframe. The first two columns should represent the longitude and latitude (or x,y coordinates if \code{lonlat = FALSE}).}
+\item{data}{Matrix or dataframe. The first two columns should represent the
+longitude and latitude (or x,y coordinates if \code{lonlat = FALSE}).}
 
-\item{k}{Integer. The number of folds (partitions) that have to be created. By default 5 folds are created.}
+\item{k}{Integer. The number of folds (partitions) that have to be created.
+By default 5 folds are created.}
 
-\item{lonlat}{Logical. If \code{TRUE} (default) then Great Circle distances are calculated else if \code{FALSE} Euclidean (planar) distances are calculated.}
+\item{lonlat}{Logical. If \code{TRUE} (default) then Great Circle distances
+are calculated else if \code{FALSE} Euclidean (planar) distances are
+calculated.}
 }
 \value{
 A vector with fold numbers ranging from 1 to k.
 }
 \description{
-\code{kfold_disc} creates a k-fold partitioning of geographical data for cross-validation based on the distance between points. The n points nearest to a selected point are put into a group.
-Returns a vector with fold numbers ranging from 1 to k.
+\code{kfold_disc} creates a k-fold partitioning of geographical data for
+cross-validation based on the distance between points. The n points nearest
+to a selected point are put into a group. Returns a vector with fold numbers
+ranging from 1 to k.
 }
 \examples{
 set.seed(42)

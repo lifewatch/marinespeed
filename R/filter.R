@@ -2,15 +2,21 @@
 
 #' Filter points based on distance to other points
 #'
-#' @usage
-#' geographic_filter(data, filter_data, lonlat = TRUE, bufferdistance=200*1000)
+#' @usage geographic_filter(data, filter_data, lonlat = TRUE,
+#' bufferdistance=200*1000)
 #'
-#' @param data Matrix or dataframe. The first two columns should represent the longitude and latitude (or x,y coordinates if \code{lonlat = FALSE}).
-#' @param filter_data Matrix or dataframe. The first two columns should represent the longitude and latitude (or x,y coordinates if \code{lonlat = FALSE}).
-#' @param lonlat Logical. If \code{TRUE} (default) then Great Circle distances are calculated else Euclidean (planar) distances are calculated.
-#' @param buffer_distance Positive number. The minimal distance a point in \code{data} should be from a point in \code{filter_data}.
+#' @param data Matrix or dataframe. The first two columns should represent the
+#'   longitude and latitude (or x,y coordinates if \code{lonlat = FALSE}).
+#' @param filter_data Matrix or dataframe. The first two columns should
+#'   represent the longitude and latitude (or x,y coordinates if \code{lonlat =
+#'   FALSE}).
+#' @param lonlat Logical. If \code{TRUE} (default) then Great Circle distances
+#'   are calculated else Euclidean (planar) distances are calculated.
+#' @param buffer_distance Positive number. The minimal distance a point in
+#'   \code{data} should be from a point in \code{filter_data}.
 #'
-#' @return Vector of integer with the indexes of the rows in data that are not within bufferdistance of the filter_data.
+#' @return Vector of integer with the indexes of the rows in data that are not
+#'   within bufferdistance of the filter_data.
 #'
 #' @examples
 #' set.seed(42)

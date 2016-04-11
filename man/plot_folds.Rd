@@ -7,12 +7,16 @@
 plot_folds(data, folds)
 }
 \arguments{
-\item{data}{Matrix or dataframe. Data for which the folds where created. The first two columns should represent the longitude and latitude (or x,y coordinates if \code{lonlat = FALSE}).}
+\item{data}{Matrix or dataframe. Data for which the folds where created. The
+first two columns should represent the longitude and latitude (or x,y
+coordinates if \code{lonlat = FALSE}).}
 
-\item{folds}{NUmeric vector with group assignments from e.g. \code{\link{kfold_disc}} or \code{\link[dismo]{kfold}}.}
+\item{folds}{NUmeric vector with group assignments from e.g.
+\code{\link{kfold_disc}} or \code{\link[dismo]{kfold}}.}
 }
 \description{
-\code{plot_folds} makes a rudimentary plot of the data and the folds created with e.g. \code{\link{kfold_disc}} or \code{\link[dismo]{kfold}}.
+\code{plot_folds} makes a rudimentary plot of the data and the folds created
+with e.g. \code{\link{kfold_disc}} or \code{\link[dismo]{kfold}}.
 }
 \examples{
 set.seed(42)
