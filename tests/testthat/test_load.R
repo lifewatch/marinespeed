@@ -23,7 +23,12 @@ test_that("list species", {
 })
 
 test_that("get occurrences files works", {
-  ## TODO implement
+  all_paths <- get_occurrence_files()
+
+  species <- list_species()
+  first10 <- get_occurrence_files(species[1:10,])
+
+  abalistes_stellatus <- get_occurrence_files("Abalistes stellatus")
 })
 
 t <- function() {

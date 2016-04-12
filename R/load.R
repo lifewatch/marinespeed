@@ -90,16 +90,21 @@ get_occurrence_files <- function(species = NULL, raw = FALSE) {
     dir <- get_file("occurrences.zip")
   }
   paths <- list.files(dir, pattern = "[.]csv[.]gz", full.names = TRUE)
-  if(is.null(species)) {
-    species <- list_species()
+  if(!is.null(species)) {
+    if(NCOL(species) == 2 && colnames(species) == c("species", "aphia_id")) {
+      species <- species[,"species"]
+    }
+    if(is.character(species) || is.factor(species)){
+      filenames <- basename(paths)
+      filespecies <- sub("\w[0-9]*[.]csv[.]gz", "", filenames)
+      paths <- paths[filespecies %in% as.character(species)]
+    } else {
+      stop("invalid species input")
+    }
+    if(length(paths) == 0) {
+      warning("No occurrence files found for the provided species")
+    }
   }
-  if(NCOL(species) == 2) {
-    #paste()
-    ## TODO match() or something else ???
-  } else {
-
-  }
-  stop("TODO implement this")
   paths
 }
 
