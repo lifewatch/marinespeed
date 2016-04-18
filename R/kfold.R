@@ -1,9 +1,9 @@
 #' Get the data associated with a fold
 #'
-#' \code{get_fold_data} returns rows from data for a specific species for the
+#' \code{kfold_data} returns rows from data for a specific species for the
 #' kth fold
 #'
-#' @usage get_fold_data(species_name, data, folds, k, training)
+#' @usage kfold_data(species_name, data, folds, k, training)
 #'
 #' @param species_name Character vector. The name of the species you want get
 #'   the fold data for.
@@ -27,12 +27,12 @@
 #' ## TODO replace above with download of the MarineSPEED occurrence data and fold data
 #'
 #' ## get training and test data for the first fold
-#' occ_training <- get_fold_data("Abalistes stellatus", occurrence_data, folds, k = 1, training = TRUE)
-#' occ_test <- get_fold_data("Abalistes stellatus", occurrence_data, folds, k = 1, training = FALSE)
+#' occ_training <- kfold_data("Abalistes stellatus", occurrence_data, folds, k = 1, training = TRUE)
+#' occ_test <- kfold_data("Abalistes stellatus", occurrence_data, folds, k = 1, training = FALSE)
 #'
-#' background_training <- get_fold_data("Abalistes stellatus", background_data, folds, k = 1, training = TRUE)
-#' background_test <- get_fold_data("Abalistes stellatus", background_data, folds, k = 1, training = FALSE)
-get_fold_data <- function(species_name, data, folds, k, training) {
+#' background_training <- kfold_data("Abalistes stellatus", background_data, folds, k = 1, training = TRUE)
+#' background_test <- kfold_data("Abalistes stellatus", background_data, folds, k = 1, training = FALSE)
+kfold_data <- function(species_name, data, folds, k, training) {
   ## TODO refactor/change to make it easier/less typing for the user (higher level API)
   # TODO export ? @export
   kcol <- paste0("k",k)
@@ -40,7 +40,7 @@ get_fold_data <- function(species_name, data, folds, k, training) {
     stop("k not found in folds")
   }
   filter <- c(as.character(species_name), "background")
-  f <- folds[as.character(folds$species) %in% filter, kcol] == istraining
+  f <- folds[as.character(folds$species) %in% filter, kcol] == training
   d <- data[f & !is.na(f),] ## handle NA's (from e.g. pseudo-disc background)
   d
 }
@@ -236,7 +236,7 @@ kfold_disc <- function(data, k = 5, lonlat = TRUE) {
 #'
 #' @param data Matrix or dataframe. Data for which the folds where created. The
 #'   first two columns should represent the longitude and latitude (or x,y
-#'   coordinates if \code{lonlat = FALSE}).
+#'   coordinates).
 #' @param folds NUmeric vector with group assignments from e.g.
 #'   \code{\link{kfold_disc}} or \code{\link[dismo]{kfold}}.
 #'

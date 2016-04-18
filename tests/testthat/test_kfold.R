@@ -14,23 +14,25 @@ lonlat_data <- function(species=NULL, nrow=50, seed=42, stringsAsFactors = TRUE)
   lonlat
 }
 
+fold_lengths <- function(folds, k=5) {
+  sapply(1:5, function(k) sum(folds==k))
+}
+
 test_that("kfold disc returns a vector of valid folds", {
-  fold_lengths <- function(folds, k=5) {
-    sapply(1:5, function(k) sum(folds==k))
-  }
+
   d <- lonlat_data(nrow=50)
   set.seed(42)
   folds <- kfold_disc(d, k=5)
   lengths <- fold_lengths(folds, k=5)
-  expect_identical(sum(lengths), 50)
-  expect_identical(max(lengths) - min(lengths), 0)
+  expect_equal(sum(lengths), 50)
+  expect_equal(max(lengths) - min(lengths), 0)
 
   d <- lonlat_data(nrow=49)
   set.seed(42)
   folds <- kfold_disc(d, k=5)
   lengths <- fold_lengths(folds, k=5)
-  expect_identical(sum(lengths), 49)
-  expect_identical(max(lengths) - min(lengths), 1)
+  expect_equal(sum(lengths), 49)
+  expect_equal(max(lengths) - min(lengths), 1)
 })
 
 test_that("kfold disc works with lonlat=FALSE works", {

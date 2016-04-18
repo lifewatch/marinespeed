@@ -14,6 +14,14 @@ test_that("get datadir", {
   expect_true(dir.exists(marinespeed:::get_datadir()))
 })
 
+test_that("get version", {
+  expect_true(get_version(), "V1")
+  options(marinespeed_version="V.test")
+  expect_true(get_version(), "V.test")
+  options(marinespeed_version=NULL)
+  expect_true(get_version(), "V1")
+})
+
 test_that("list species", {
   tmp <- set_datadir_tmp()
   species <- list_species()
@@ -29,6 +37,16 @@ test_that("get occurrences files works", {
   first10 <- get_occurrence_files(species[1:10,])
 
   abalistes_stellatus <- get_occurrence_files("Abalistes stellatus")
+})
+
+test_that("get_fold random", {
+  species <- list_species()
+  fold <- get_folds(species[sample(1:nrow(species), 1),], fold_type = "random", k=1)
+  fold$occurrence_training
+  fold$occurrence_test
+  fold$background_training
+  fold$background_test
+
 })
 
 t <- function() {

@@ -1,19 +1,171 @@
-# "species.csv.gz"
-# filename <- "occurrences_raw.zip"
-# "occurrences.zip"
-# "pseudodisc_background_5cv_folds.csv.gz"
-# "pseudodisc_species_5cv_folds.csv.gz"
-# "random_background.csv.gz"
-# "random_background_5cv_folds.csv.gz"
-# "random_species_5cv_folds.csv.gz"
-# "targetgroup_background.csv.gz"
-# "targetgroup_background_5cv_folds.csv.gz"
-
-
-get_version <- function() {
-  "v1"
+#' List species
+#'
+#' \code{list_species} returns a dataframe with all the species names and their
+#' WoRMS identifier (\code{aphia_id}).
+#'
+#' @usage list_species()
+#'
+#' @details If the file with the list of species is not present on the hard disk
+#'   then it is downloaded and stored in the data directory. The data directory
+#'   can be set with \code{options(marinespeed_datadir = ".")}.
+#'
+#' @seealso \code{\link{lapply_kfold_species}} \code{\link{lapply_species}}
+#'   \code{\link{get_fold_data}} \code{\link{get_occurrences}}
+#'
+#' @examples
+#' species <- list_species()
+#' species$species
+#' species$aphia_id
+#' @export
+list_species <- function() {
+  read.csv(get_file("species.csv.gz"))
 }
 
+#' Get occurrence records
+#'
+#' \code{get_occurrences} returns a data.frame with all occurrence records for
+#' one or more species, first columns are species, longitude and latitude
+#' followed by environmental data columns.
+#'
+#' @usage get_occurrences(species, raw = FALSE)
+#'
+#' @param species dataframe or character vector. Dataframe like returned by
+#'   \code{\link{list_species}} or the names of the species.
+#' @param raw logical. If \code{FALSE} then 25 square kilometer grid and manual
+#'   outlier filtered occurrence records are returned.
+#'
+#' @return Dataframe with as columns: species, longitude, latitude and the
+#'   environmental variable columns.
+#'
+#' @seealso \code{\link{list_species}} \code{\link{get_fold_data}}
+#'   \code{\link{get_background}}
+#'
+#' @examples \dontrun{
+#' abalistes_stellatus <- get_occurrences("Abalistes stellatus")
+#'
+#' species <- list_species()
+#' first10 <- get_occurrences(species[1:10,])
+#' }
+get_occurrences <- function(species = NULL, raw = FALSE) {
+  if(raw) {
+    dir <- get_file("occurrences_raw.zip")
+  } else {
+    dir <- get_file("occurrences.zip")
+  }
+  paths <- list.files(dir, pattern = "[.]csv[.]gz", full.names = TRUE)
+  if(!is.null(species)) {
+    species <- get_species_names(species)
+
+    filenames <- basename(paths)
+    filespecies <- sub("\\w[0-9]*[.]csv[.]gz", "", filenames)
+    paths <- paths[filespecies %in% species]
+
+    if(length(paths) == 0) {
+      warning("No occurrence files found for the provided species")
+    }
+  }
+  do.call("rbind", lapply(paths, function(p) { read.csv(p) }))
+}
+
+#' Get fold data
+#'
+#' \code{get_fold_data} returns a list of training and test occurrence and
+#' background data fold(s) for one or more species.
+#'
+#' @usage get_fold_data(species, fold_type, k)
+#'
+#' @param species dataframe or character vector. Row from the dataframe returned
+#'   by \code{\link{list_species}} or the name of the species.
+#' @param fold_type character. Type of partitioning you want to use, default is
+#'   \code{"disc"}.
+#' @param k integer vector. Numbers of the folds you want to get data for, if
+#'   you want all 5-folds pass use \code{1:5}, which is the default.
+#'
+#' @details The different \code{fold_type} are:
+#'
+#'   \code{"disc"}: 5-fold disc partitioning of occurrences with pairwise
+#'   distance sampled and buffer filtered random background points, equivalent
+#'   to calling \code{\link{kfold_occurrence_background}} with
+#'   \code{occurrence_fold_type = "disc", k = 5, pwd_sample = TRUE,
+#'   background_buffer = 200*1000}
+#'
+#'   \code{"random"}: 5-fold random partitioning of occurrences and random
+#'   background points, equivalent to calling
+#'   \code{\link{kfold_occurrence_background}} with \code{occurrence_fold_type =
+#'   "random", k = 5, pwd_sample = FALSE, background_buffer = 0}
+#'
+#'   \code{"targetgroup"}: same way of partitioning as the \code{"random"} folds
+#'   but instead of random background points, a random subset of all occurrences
+#'   points was used creating a targetgroup background points set which has the
+#'   same sampling bias as the entire dataset.
+#'
+#' @return A 5 element list with fold data filled in for all \code{k}. Fold data
+#'   consists of a list with 4 elements: \code{occurrence_training},
+#'   \code{occurrence_test}, \code{background_training} and
+#'   \code{background_test}.
+#'
+#' @seealso \code{\link{list_species}} \code{\link{lapply_kfold_species}}
+#'   \code{\link{lapply_species}} \code{\link{kfold_data}}
+#'
+#' @examples \dontrun{
+#' aba_folds <- get_fold_data("Abalistes stellatus", "random", k = 1:5)
+#' }
+#' @export
+get_fold_data <- function(species, fold_type, k) {
+  if(NROW(species) > 1) {
+    ## otherwise might get into memory problems
+    stop("get_fold_data expects only 1 species")
+  }
+  if(min(k) < 1 || max(k) > 5) {
+    stop("k should be between 1 and 5")
+  }
+  species <- get_species_names(species)
+  occurrences <- get_occurrences(species)
+  folds <- load_folds(fold_type)
+  if(fold_type == "targetgroup") {
+    bg <- load_background("targetgroup")
+  } else {
+    bg <- load_background("random")
+  }
+#   specieslist <- list()
+#   for (si in 1:length(species)) {
+  klist <- list(NULL, NULL, NULL, NULL, NULL)
+  for (ki in k) {
+    occ_train <- kfold_data(species, occurrences, folds$species, k, training = TRUE)
+    occ_test <- kfold_data(species, occurrences, folds$species, k, training = TRUE)
+    bg_train <- kfold_data(species, bg, folds$background, k, training = FALSE)
+    bg_test <- kfold_data(species, bg, folds$background, k, training = FALSE)
+    bg_train$species <- "background"
+    bg_test$species <- "background"
+    klist[[ki]] <- list(occurrence_training=occ_train, occurrence_test=occ_test,
+                        background_training=bg_train, background_test=bg_test)
+  }
+  # }
+  klist
+}
+
+#' Get MarineSPEED version
+#'
+#' \code{get_version} returns the currently used MarineSPEED version, this can
+#' be changed by setting \code{options(marinespeed_version="<version
+#' information>")}.
+#'
+#' @usage get_version()
+#'
+#' @return Character with the current version ("V1") or another version if the
+#'   \code{marinespeed_version} has been set.
+#'
+#' @examples
+#' print(get_version())
+#'
+#' @export
+get_version <- function() {
+  v <- getOption("marinespeed_version")
+  if(is.null(v)) {
+    v <- "v1"
+  }
+  v
+}
 
 get_datadir <- function() {
   datadir <- getOption("marinespeed_datadir")
@@ -43,144 +195,110 @@ get_file <- function(filename) {
   outfile_nozip
 }
 
-#' List species
-#'
-#' \code{list_species} returns a dataframe with all the species names and their
-#' WoRMS identifier (\code{aphia_id}).
-#'
-#' @usage list_species()
-#'
-#' @details If the file with the list of species is not present on the hard disk
-#'   then it is downloaded and stored in the data directory. The data directory
-#'   can be set with \code{options(marinespeed_datadir = ".")}.
-#'
-#' @examples
-#' species <- list_species()
-#' species$species
-#' species$aphia_id
-#' @export
-list_species <- function() {
-  read.csv(get_file("species.csv.gz"))
-}
 
-#' Get filenames of the occurrences files for some or all species
-#'
-#' \code{get_occurrence_files} returns a character vector with the full paths to
-#' the occurences files for all or a selection of species
-#'
-#' @usage get_occurrence_file(species = NULL, raw = FALSE)
-#'
-#' @param species dataframe or character vector. Dataframe like returned by \code{\link{list_species}} or the names of the species. If \code{NULL} then all species occurrence files are returned.
-#' @param raw logical. If \code{TRUE} the occurrence records without 25km² grid filtering and outlier removal. Default is \code{FALSE}.
-#'
-#' @examples
-#' \dontrun{
-#' all_paths <- get_occurrence_files()
-#'
-#' species <- list_species()
-#' first10 <- get_occurrence_files(species[1:10,])
-#'
-#' abalistes_stellatus <- get_occurrence_files("Abalistes stellatus")
-#' }
-#' @export
-get_occurrence_files <- function(species = NULL, raw = FALSE) {
-  if(raw) {
-    dir <- get_file("occurrences_raw.zip")
-  } else {
-    dir <- get_file("occurrences.zip")
+get_species_names <- function(species) {
+  if(NCOL(species) == 2 && colnames(species) == c("species", "aphia_id")) {
+    species <- species[,"species"]
   }
-  paths <- list.files(dir, pattern = "[.]csv[.]gz", full.names = TRUE)
-  if(!is.null(species)) {
-    if(NCOL(species) == 2 && colnames(species) == c("species", "aphia_id")) {
-      species <- species[,"species"]
-    }
-    if(is.character(species) || is.factor(species)){
-      filenames <- basename(paths)
-      filespecies <- sub("\w[0-9]*[.]csv[.]gz", "", filenames)
-      paths <- paths[filespecies %in% as.character(species)]
-    } else {
-      stop("invalid species input")
-    }
-    if(length(paths) == 0) {
-      warning("No occurrence files found for the provided species")
-    }
+  if(!is.character(species) && !is.factor(species)){
+    stop("invalid species input")
   }
-  paths
+  as.character(species)
 }
-
 
 #' Load folds
 #'
-#' @details The different supported \code{fold_type} are:
+#' \code{load_folds} returns the different pre-generated folds information. To
+#' get the fold data for a species see also \code{\link{get_fold_data}}.
 #'
-#' \code{"pseudodisc"}: 5-fold disc partitioning of occurrences with pairwise
-#' distance sampled and buffer filtered random background points, equivalent to
-#' calling \code{\link{kfold_occurrence_background}} with
-#' \code{occurrence_fold_type = "disc", k = 5, pwd_sample = TRUE,
-#' background_buffer = 200*1000}
+#' @usage load_folds(type = "disc")
 #'
-#' \code{"random"}:
+#' @param type character. The type of partitioning you want to load.
 #'
-#' \code{"targetgroup"}:
+#' @details The different supported \code{type} are:
+#'
+#'   \code{"disc"}: 5-fold disc partitioning of occurrences with pairwise
+#'   distance sampled and buffer filtered random background points, equivalent
+#'   to calling \code{\link{kfold_occurrence_background}} with
+#'   \code{occurrence_fold_type = "disc", k = 5, pwd_sample = TRUE,
+#'   background_buffer = 200*1000}
+#'
+#'   \code{"random"}: 5-fold random partitioning of occurrences and random
+#'   background points, equivalent to calling
+#'   \code{\link{kfold_occurrence_background}} with \code{occurrence_fold_type =
+#'   "random", k = 5, pwd_sample = FALSE, background_buffer = 0}
+#'
+#'   \code{"targetgroup"}: same way of partitioning as the \code{"random"} folds
+#'   but instead of random background points, a random subset of all occurrences
+#'   points was used creating a targetgroup background points set which has the
+#'   same sampling bias as the entire dataset.
+#'
+#' @return A list with two entries \code{"background"} and \code{"species"},
+#'   each entry is a dataframe with species name column and 5 fold columns as
+#'   created by \code{\link{kfold_occurrence_background}}
+#'
+#' @seealso \code{\link{lapply_kfold_species}} \code{\link{get_fold_data}}
+#'   \code{\link{get_occurrences}} \code{\link{get_background}}
+#'   \code{\link{kfold_data}}
+#'
+#' @examples \dontrun{
+#' folds <- load_folds("random")
+#'
+#' abalistes <- "Abalistes stellatus"
+#' occ <- get_occurrences(abalistes)
+#' bg <- load_background("random")
+#'
+#' occ_train <- kfold_data(abalistes, occ, folds$species, k=1, training=TRUE)
+#' occ_test <- kfold_data(abalistes, occ, folds$species, k=1, training=FALSE)
+#' bg_train <- kfold_data(abalistes, bg, folds$background, k=1, training=TRUE)
+#' bg_test <- kfold_data(abalistes, bg, folds$background, k=1, training=FALSE)
+#' }
 #' @export
-load_folds <- function(fold_type = "pseudodisc") {
-  fold_name <- as.character(fold_type)
-  if(fold_type == "pseudodisc") {
+load_folds <- function(type = "disc") {
+  type <- as.character(type)
+  if(type == "disc") {
     bg <- "pseudodisc_background_5cv_folds.csv.gz"
-    species <- "pseudodisc_background_5cv_folds.csv.gz"
-  } else if(fold_type == "random") {
+    species <- "pseudodisc_species_5cv_folds.csv.gz"
+  } else if(type == "random") {
     bg <- "random_background_5cv_folds.csv.gz"
     species <- "random_species_5cv_folds.csv.gz"
-  } else if(fold_type == "targetgroup") {
+  } else if(type == "targetgroup") {
     bg <- "targetgroup_background_5cv_folds.csv.gz"
     species <- "random_species_5cv_folds.csv.gz"
   } else {
     stop("fold_type not supported")
   }
-  list(bg_folds = get_file(bg), species_folds = get_file(species))
+  list(background = read.csv(get_file(bg)), species = read.csv(get_file(species)))
 }
 
+#' Load background data
+#'
+#' \code{load_background} returns pre-generated background data.
+#'
+#' @usage load_background(type)
+#'
+#' @param type character. Either \code{"random"} or \code{"targetgroup"}.
+#'
+#' @details The targetgroup background was created by subsampling an average of
+#'   37 occurrence records (20000 in total) from each species in the dataset
+#'   providing in essence the same sampling bias as the entire dataset.
+#'
+#' @return A dataframe with all background points.
+#'
+#' @seealso \code{\link{get_fold_data}} \code{\link{get_occurrences}}
+#'   \code{\link{load_folds}}
+#'
+#' @examples \dontrun{
+#' random_bg <- load_background("random")
+#' plot(random_bg[,2:3], pch=".", main="random background")
+#'
+#' targetgroup_bg <- load_background("targetgroup")
+#' plot(targetgroup_bg[,2:3], pch=".", main="targetgroup background")
+#' }
 #' @export
-lapply_species <- function(fun, ..., raw = FALSE) {
-  fun <- match.fun(fun)
-  result <- list()
-  species <- list_species()
-  for(i in 1:NROW(species)) {
-    row <- species[i,]
-    file <- paste0(get_occurrences_dir(raw = raw), row$species, " ", row$aphia_id, ".csv.gz")
-    if(file.exists(file)) {
-      data <- read.csv(file, stringsAsFactors = FALSE)
-
-      result[[i]] <- fun(row, data, ...)
-    } else {
-      print(paste("OCCURRENCES FILE NOT FOUND", file))
-    }
+load_background <- function(type) {
+  if(!(as.character(type) %in% c("random", "targetgroup"))) {
+    stop("background type not recognized")
   }
-  result
+  read.csv(get_file(paste0(as.character(type), "_background.csv.gz")))
 }
-
-#' @export
-lapply_kfold_species <- function(fun, ..., kfolds = 1:5, fold_type = "pseudodisc",  raw = FALSE) {
-  stop("TODO implement this")
-#   fun <- match.fun(fun)
-#   result <- list()
-#   species <- list_species()
-#   for(i in 1:NROW(species)) {
-#     row <- species[i,]
-#     file <- paste0(get_occurrences_dir(raw = raw), row$species, " ", row$aphia_id, ".csv.gz")
-#     if(file.exists(file)) {
-#       data <- read.csv(file, stringsAsFactors = FALSE)
-#
-#       result[[i]] <- fun(row, data, ...)
-#     } else {
-#       print(paste("OCCURRENCES FILE NOT FOUND", file))
-#     }
-#   }
-#   result
-}
-
-# "occurrences_raw.zip"
-# "occurrences.zip"
-# "random_background.csv.gz"
-# "targetgroup_background.csv.gz"
-

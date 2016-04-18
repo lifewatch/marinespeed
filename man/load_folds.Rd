@@ -4,22 +4,56 @@
 \alias{load_folds}
 \title{Load folds}
 \usage{
-load_folds(fold_type = "pseudodisc")
+load_folds(type = "disc")
+}
+\arguments{
+\item{type}{character. The type of partitioning you want to load.}
+}
+\value{
+A list with two entries \code{"background"} and \code{"species"},
+  each entry is a dataframe with species name column and 5 fold columns as
+  created by \code{\link{kfold_occurrence_background}}
 }
 \description{
-Load folds
+\code{load_folds} returns the different pre-generated folds information. To
+get the fold data for a species see also \code{\link{get_fold_data}}.
 }
 \details{
-The different supported \code{fold_type} are:
+The different supported \code{type} are:
 
-\code{"pseudodisc"}: 5-fold disc partitioning of occurrences with pairwise
-distance sampled and buffer filtered random background points, equivalent to
-calling \code{\link{kfold_occurrence_background}} with
-\code{occurrence_fold_type = "disc", k = 5, pwd_sample = TRUE,
-background_buffer = 200*1000}
+  \code{"disc"}: 5-fold disc partitioning of occurrences with pairwise
+  distance sampled and buffer filtered random background points, equivalent
+  to calling \code{\link{kfold_occurrence_background}} with
+  \code{occurrence_fold_type = "disc", k = 5, pwd_sample = TRUE,
+  background_buffer = 200*1000}
 
-\code{"random"}:
+  \code{"random"}: 5-fold random partitioning of occurrences and random
+  background points, equivalent to calling
+  \code{\link{kfold_occurrence_background}} with \code{occurrence_fold_type =
+  "random", k = 5, pwd_sample = FALSE, background_buffer = 0}
 
-\code{"targetgroup"}:
+  \code{"targetgroup"}: same way of partitioning as the \code{"random"} folds
+  but instead of random background points, a random subset of all occurrences
+  points was used creating a targetgroup background points set which has the
+  same sampling bias as the entire dataset.
+}
+\examples{
+\dontrun{
+folds <- load_folds("random")
+
+abalistes <- "Abalistes stellatus"
+occ <- get_occurrences(abalistes)
+bg <- load_background("random")
+
+occ_train <- kfold_data(abalistes, occ, folds$species, k=1, training=TRUE)
+occ_test <- kfold_data(abalistes, occ, folds$species, k=1, training=FALSE)
+bg_train <- kfold_data(abalistes, bg, folds$background, k=1, training=TRUE)
+bg_test <- kfold_data(abalistes, bg, folds$background, k=1, training=FALSE)
+}
+}
+\seealso{
+\code{\link{lapply_kfold_species}} \code{\link{get_fold_data}}
+  \code{\link{get_occurrences}} \code{\link{get_background}}
+  \code{\link{kfold_data}}
 }
 
