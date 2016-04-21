@@ -2,7 +2,7 @@ Package: marinespeed
 Type: Package
 Title: Benchmark data sets and functions for marine species distribution
     modeling
-Version: 0.0.0.9005
+Version: 0.0.0.9006
 Date: 2016-04-01
 Depends:
     R (>= 3.2.0),
@@ -15,7 +15,7 @@ Description: A collection of marine species benchmark data sets and functions
 License: MIT + file LICENSE
 LazyData: TRUE
 Suggests:
-    FNN,
-    sdmpredictors,
-    biomod2
+    biomod2,
+    dismo,
+    FNN
 RoxygenNote: 5.0.1
