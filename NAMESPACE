@@ -2,6 +2,7 @@
 
 export(geographic_filter)
 export(get_fold_data)
+export(get_occurrences)
 export(get_version)
 export(kfold_disc)
 export(kfold_occurrence_background)

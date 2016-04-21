@@ -2,61 +2,106 @@ library(marinespeed)
 
 context("load")
 
-set_datadir_tmp <- function() {
+setup_load <- function() {
+  skip_on_cran()
+  # skip_on_travis()
+}
+
+
+test_that("get datadir", {
   tmp <- tempdir()
   options(marinespeed_datadir=tmp)
-  tmp
-}
-test_that("get datadir", {
-  tmp <- set_datadir_tmp()
   expect_equal(marinespeed:::get_datadir(), tmp)
   options(marinespeed_datadir=NULL)
   expect_true(dir.exists(marinespeed:::get_datadir()))
 })
 
 test_that("get version", {
-  expect_true(get_version(), "V1")
+  expect_equal(get_version(), "v1")
   options(marinespeed_version="V.test")
-  expect_true(get_version(), "V.test")
+  expect_equal(get_version(), "V.test")
   options(marinespeed_version=NULL)
-  expect_true(get_version(), "V1")
+  expect_equal(get_version(), "v1")
 })
 
 test_that("list species", {
-  tmp <- set_datadir_tmp()
+  setup_load()
+
   species <- list_species()
   expect_more_than(NROW(species), 500)
   expect_equal(NCOL(species), 2)
   expect_equal(colnames(species), c("species", "aphia_id"))
 })
 
-test_that("get occurrences files works", {
-  all_paths <- get_occurrence_files()
+test_that("get occurrences works", {
+  setup_load()
+
+  abalistes_stellatus <- get_occurrences("Abalistes stellatus")
+  expect_more_than(NROW(abalistes_stellatus), 10)
+  expect_more_than(NCOL(abalistes_stellatus), 50)
 
   species <- list_species()
-  first10 <- get_occurrence_files(species[1:10,])
-
-  abalistes_stellatus <- get_occurrence_files("Abalistes stellatus")
+  occ <- get_occurrences(species[1:3,])
+  expect_more_than(NROW(occ), 10)
+  expect_more_than(NCOL(occ), 50)
+  expect_equal(length(unique(occ$species)), 3)
 })
 
-test_that("get_fold random", {
-  species <- list_species()
-  fold <- get_folds(species[sample(1:nrow(species), 1),], fold_type = "random", k=1)
-  fold$occurrence_training
-  fold$occurrence_test
-  fold$background_training
-  fold$background_test
+test_that("get_fold_data random", {
+  setup_load()
 
+  check_fold <- function(fold) {
+    expect_more_than(NROW(fold$occurrence_training), 10)
+    expect_more_than(NROW(fold$occurrence_test), 10)
+    expect_more_than(NROW(fold$background_training), 1000)
+    expect_more_than(NROW(fold$background_test), 100)
+    expect_more_than(NCOL(fold$occurrence_training), 50)
+    expect_equal(NCOL(fold$occurrence_test), NCOL(fold$occurrence_training))
+    expect_equal(NCOL(fold$background_training), NCOL(fold$occurrence_training))
+    expect_equal(NCOL(fold$background_test), NCOL(fold$occurrence_test))
+  }
+
+  folds <- get_fold_data("Abalistes stellatus", fold_type = "random", k=c(2,4))
+
+  expect_null(folds[[1]])
+  check_fold(folds[[2]])
+  expect_null(folds[[3]])
+  check_fold(folds[[4]])
+  expect_null(folds[[5]])
 })
 
-t <- function() {
-  d <- marinespeed::get_occurrences_dir(raw = FALSE)
-  s <- marinespeed::list_species()
-  marinespeed::load_folds()
-  marinespeed::lapply_species(function(speciesinfo, data) { print(paste(speciesinfo, NROW(data)))}, raw = FALSE)
+test_that("get_file works", {
+  setup_load()
+  tmp <- tempdir()
+  options(marinespeed_datadir=tmp)
+  file <- get_file("species.csv.gz")
+  expect_true(file.exists(file))
+  species <- read.csv(file)
+  expect_more_than(NROW(species), 500)
+  file.remove(file)
+  expect_false(file.exists(file))
+  options(marinespeed_datadir=NULL)
+})
 
+test_that("load_folds works", {
+  setup_load()
+  check_folds <- function(folds) {
+    expect_equal(NCOL(folds$background),6)
+    expect_equal(NCOL(folds$species),6)
+    expect_more_than(NROW(folds$background),1000)
+    expect_more_than(NROW(folds$species),10000)
+  }
+  check_folds(load_folds("disc"))
+  check_folds(load_folds("random"))
+  check_folds(load_folds("targetgroup"))
+})
 
-  marinespeed:::get_file("test.csv.gz")
-  marinespeed:::get_file("test.zip")
-  marinespeed:::get_datadir()
-}
+test_that("load_background works", {
+  setup_load()
+  check_background <- function(bg) {
+    expect_more_than(NCOL(bg), 50)
+    expect_more_than(NROW(bg), 1000)
+  }
+  check_background(load_background("random"))
+  check_background(load_background("random"))
+})

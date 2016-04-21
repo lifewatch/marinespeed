@@ -46,8 +46,8 @@ test_that("kfold disc works with lonlat=FALSE works", {
   expect_identical(folds, folds2) ## should be the same
   expect_false(identical(folds, folds_lonlat)) ## should be different
   lengths <- fold_lengths(folds, k=5)
-  expect_identical(sum(lengths), 50)
-  expect_identical(max(lengths) - min(lengths), 0)
+  expect_equal(sum(lengths), 50)
+  expect_equal(max(lengths) - min(lengths), 0)
 })
 
 validate_folds <- function(folds) {

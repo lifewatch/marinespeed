@@ -33,10 +33,8 @@
 #' background_training <- kfold_data("Abalistes stellatus", background_data, folds, k = 1, training = TRUE)
 #' background_test <- kfold_data("Abalistes stellatus", background_data, folds, k = 1, training = FALSE)
 kfold_data <- function(species_name, data, folds, k, training) {
-  ## TODO refactor/change to make it easier/less typing for the user (higher level API)
-  # TODO export ? @export
   kcol <- paste0("k",k)
-  if(!(kcol %in% colnames(folds))) {
+  if(!all(kcol %in% colnames(folds))) {
     stop("k not found in folds")
   }
   filter <- c(as.character(species_name), "background")

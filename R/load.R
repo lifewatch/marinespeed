@@ -46,6 +46,7 @@ list_species <- function() {
 #' species <- list_species()
 #' first10 <- get_occurrences(species[1:10,])
 #' }
+#' @export
 get_occurrences <- function(species = NULL, raw = FALSE) {
   if(raw) {
     dir <- get_file("occurrences_raw.zip")
@@ -57,7 +58,7 @@ get_occurrences <- function(species = NULL, raw = FALSE) {
     species <- get_species_names(species)
 
     filenames <- basename(paths)
-    filespecies <- sub("\\w[0-9]*[.]csv[.]gz", "", filenames)
+    filespecies <- sub("\\s?[0-9]*[.]csv[.]gz", "", filenames)
     paths <- paths[filespecies %in% species]
 
     if(length(paths) == 0) {
@@ -180,7 +181,8 @@ get_datadir <- function() {
 
 get_file <- function(filename) {
   datadir <- get_datadir()
-  outfile <- file.path(datadir, filename)
+
+  outfile <- normalizePath(file.path(datadir, filename))
   outfile_nozip <- file.path(datadir,sub("[.]zip$", "", filename))
   if(!file.exists(outfile) && !dir.exists(outfile_nozip)) {
     root <- paste0("http://www.phycology.ugent.be/research/marinespeed/", get_version(), "/")
@@ -205,6 +207,8 @@ get_species_names <- function(species) {
   }
   as.character(species)
 }
+
+
 
 #' Load folds
 #'
@@ -268,7 +272,23 @@ load_folds <- function(type = "disc") {
   } else {
     stop("fold_type not supported")
   }
-  list(background = read.csv(get_file(bg)), species = read.csv(get_file(species)))
+
+  rdscache <- function(file) {
+    rds_file <- sub("[.]csv[.]gz$", ".rds", file)
+    data <- NULL
+    if(file.exists(rds_file)) { ## cache as rds (faster)
+      data <- readRDS(rds_file)
+    }
+    if(is.null(data) || getOption("stringsAsFactors") != is.factor(data[1,1])) {
+      data <- read.csv(file)
+      saveRDS(data, rds_file)
+    }
+    data
+  }
+  bg_folds <- rdscache(get_file(bg))
+  species_folds <- rdscache(get_file(species))
+
+  list(background = bg_folds, species = species_folds)
 }
 
 #' Load background data

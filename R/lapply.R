@@ -40,10 +40,11 @@ lapply_species <- function(fun, ..., species = NULL, raw = FALSE) {
   if(is.null(species)) {
     species <- list_species()
   }
+  species <- get_species_names(species)
   for(i in 1:NROW(species)) {
-    row <- species[i,]
-    data <- get_occurrences(row[,1], raw = raw)
-    result[[row$species]] <- fun(row, data, ...)
+    sp <- species[i]
+    data <- get_occurrences(sp, raw = raw)
+    result[[sp]] <- fun(sp, data, ...)
   }
   result
 }
@@ -93,7 +94,8 @@ lapply_species <- function(fun, ..., species = NULL, raw = FALSE) {
 #'   same sampling bias as the entire dataset.
 #'
 #' @return  A list with one named entry for every species provided or for all
-#'   species. TODO : NOT CORRECT
+#'   species. Every list entry is a list with \code{k} as names and the result
+#'   of \code{fun} as value.
 #'
 #' @seealso \code{\link{list_species}} \code{\link{lapply_species}}
 #'   \code{\link{get_fold_data}}
@@ -118,6 +120,7 @@ lapply_kfold_species <- function(fun, ..., species = NULL, fold_type = "disc", k
   if(is.null(species)) {
     species <- list_species()
   }
+  species <- get_species_names(species)
 
   folds <- load_folds(fold_type)
   if(fold_type == "targetgroup") {
@@ -127,22 +130,22 @@ lapply_kfold_species <- function(fun, ..., species = NULL, fold_type = "disc", k
   }
 
   for(i in 1:NROW(species)) {
-    row <- species[i,]
-    occurrences <- get_occurrences(row[,1])
+    sp <- species[i]
+    occurrences <- get_occurrences(sp)
 
     klist <- list(NULL, NULL, NULL, NULL, NULL)
     for (ki in k) {
-      occ_train <- kfold_data(species, occurrences, folds$species, k, training = TRUE)
-      occ_test <- kfold_data(species, occurrences, folds$species, k, training = TRUE)
-      bg_train <- kfold_data(species, bg, folds$background, k, training = FALSE)
-      bg_test <- kfold_data(species, bg, folds$background, k, training = FALSE)
-      bg_train$species <- "background"
-      bg_test$species <- "background"
+      occ_train <- kfold_data(sp, occurrences, folds$species, k, training = TRUE)
+      occ_test <- kfold_data(sp, occurrences, folds$species, k, training = TRUE)
+      bg_train <- kfold_data(sp, bg, folds$background, k, training = FALSE)
+      bg_test <- kfold_data(sp, bg, folds$background, k, training = FALSE)
+      bg_train$species <- rep("background", nrow(bg_train))
+      bg_test$species <- rep("background", nrow(bg_test))
       data <- list(occurrence_training=occ_train, occurrence_test=occ_test,
                    background_training=bg_train, background_test=bg_test)
-      klist[[ki]] <- fun(row, data, ...)
+      klist[[ki]] <- fun(sp, data, ...)
     }
-    result[[row$species]] <- klist
+    result[[sp]] <- klist
   }
   result
 }
