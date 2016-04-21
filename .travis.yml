@@ -1,0 +1,15 @@
+language: r
+sudo: required
+warnings_are_errors: true
+before_script:
+  - git config --global user.name "travis"
+  - git config --global user.email "travis@example.org"
+
+r_github_packages:
+  - rstudio/rmarkdown
+  - hadley/testthat
+  - jimhester/covr
+  - jimhester/lintr
+
+after_success:
+  - Rscript -e 'covr::codecov()'

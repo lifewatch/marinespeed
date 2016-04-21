@@ -26,7 +26,8 @@ you want all 5-folds pass use \code{1:5}, which is the default.}
 }
 \value{
 A list with one named entry for every species provided or for all
-  species. TODO : NOT CORRECT
+  species. Every list entry is a list with \code{k} as names and the result
+  of \code{fun} as value.
 }
 \description{
 \code{lapply_kfold_species} returns a list of lists where each element is the

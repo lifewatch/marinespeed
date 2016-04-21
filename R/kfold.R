@@ -19,12 +19,15 @@
 #' @return Filtered version of data.
 #'
 #' @examples
+#' ## random data folds
 #' set.seed(42)
 #' occurrence_data <- data.frame(species = rep("Abalistes stellatus", 50), longitude = runif(50, -180, 180), latitude = runif(50, -90, 90))
 #' background_data <- data.frame(species = rep("background", 10000), longitude = runif(1000, -180, 180), latitude = runif(1000, -90, 90))
 #' folds <- kfold_occurrence_background(occurrence_data, background_data)
-#'
-#' ## TODO replace above with download of the MarineSPEED occurrence data and fold data
+#' ## alternative with real data (but see also the function get_fold_data)
+#' # occurrence_data <- get_occurrences("Abalistes stellatus")
+#' # background_data <- load_background("random")
+#' # folds <- load_folds("random")
 #'
 #' ## get training and test data for the first fold
 #' occ_training <- kfold_data("Abalistes stellatus", occurrence_data, folds, k = 1, training = TRUE)
