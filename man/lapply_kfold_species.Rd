@@ -4,8 +4,8 @@
 \alias{lapply_kfold_species}
 \title{Apply a function over the folds of a set of species}
 \usage{
-lapply_kfold_species(fun, ..., k = 1:5, fold_type = "disc", species =
-  NULL, raw = FALSE)
+lapply_kfold_species(fun, ..., species = NULL, fold_type = "disc", k =
+  1:5)
 }
 \arguments{
 \item{fun}{function. The function to be applied to the occurrence records of
@@ -67,7 +67,8 @@ plot_occurrences <- function(speciesname, data, k) {
    points(data$occurrence_test[,c("longitude", "latitude")], pch=".", col="red")
 }
 
-# plot training (blue) and test (red) occurrences of the first 2 folds for the first 10 species
+# plot training (blue) and test (red) occurrences
+# of the first 2 folds for the first 10 species
 species <- list_species()
 lapply_kfold_species(plot_occurrences, species=species[1:10,],
                      fold_type = "disc", k = 1:2)

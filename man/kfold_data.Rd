@@ -26,14 +26,16 @@ if \code{FALSE} then test data is returned.}
 Filtered version of data.
 }
 \description{
-\code{kfold_data} returns rows from data for a specific species for the
-kth fold
+\code{kfold_data} returns rows from data for a specific species for the kth
+fold. The get data from pre-made folds use \code{\link{get_fold_data}}
 }
 \examples{
 ## random data folds
 set.seed(42)
-occurrence_data <- data.frame(species = rep("Abalistes stellatus", 50), longitude = runif(50, -180, 180), latitude = runif(50, -90, 90))
-background_data <- data.frame(species = rep("background", 10000), longitude = runif(1000, -180, 180), latitude = runif(1000, -90, 90))
+occurrence_data <- data.frame(species = rep("Abalistes stellatus", 50),
+                              longitude = runif(50, -180, 180), latitude = runif(50, -90, 90))
+background_data <- data.frame(species = rep("background", 10000),
+                              longitude = runif(1000, -180, 180), latitude = runif(1000, -90, 90))
 folds <- kfold_occurrence_background(occurrence_data, background_data)
 ## alternative with real data (but see also the function get_fold_data)
 # occurrence_data <- get_occurrences("Abalistes stellatus")
@@ -44,7 +46,8 @@ folds <- kfold_occurrence_background(occurrence_data, background_data)
 occ_training <- kfold_data("Abalistes stellatus", occurrence_data, folds, k = 1, training = TRUE)
 occ_test <- kfold_data("Abalistes stellatus", occurrence_data, folds, k = 1, training = FALSE)
 
-background_training <- kfold_data("Abalistes stellatus", background_data, folds, k = 1, training = TRUE)
-background_test <- kfold_data("Abalistes stellatus", background_data, folds, k = 1, training = FALSE)
+bg_training <- kfold_data("Abalistes stellatus", background_data, folds, k = 1, training = TRUE)
+bg_test <- kfold_data("Abalistes stellatus", background_data, folds, k = 1, training = FALSE)
+
 }
 

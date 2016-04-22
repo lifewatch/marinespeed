@@ -1,4 +1,6 @@
-#' @export
+#' Spatial sorting bias
+#'
+#' For more information see \code{\link[dismo]{ssb}}
 ssb <- function(p, a, reference, lonlat = TRUE, avg = TRUE) {
   distfun <- get_distfun(lonlat, dismo = TRUE)
   if (inherits(p, "SpatialPoints"))
@@ -12,7 +14,7 @@ ssb <- function(p, a, reference, lonlat = TRUE, avg = TRUE) {
   reference <- as.matrix(reference)[, 1:2]
 
   mindist <- function(distfun, a, b) {
-    if(require(FNN)) {
+    if(requireNamespace(FNN)) {
       if(lonlat) {
         az <- lonlat_xyz(a,1:2)
         bz <- lonlat_xyz(b,1:2)
@@ -46,7 +48,9 @@ ssb <- function(p, a, reference, lonlat = TRUE, avg = TRUE) {
   }
 }
 
-#' @export
+#' Pair-wise distance sampling
+#'
+#' For more information see \code{\link[dismo]{pwdSample}}
 pwdSample <- function(fixed, sample, reference, tr = 0.33, nearest= TRUE, n=1, lonlat = TRUE, warn = TRUE) {
   distfun <- get_distfun(lonlat, dismo = TRUE)
   stopifnot(tr > 0)

@@ -122,11 +122,11 @@ get_fold_data <- function(species, fold_type, k) {
   }
   species <- get_species_names(species)
   occurrences <- get_occurrences(species)
-  folds <- load_folds(fold_type)
+  folds <- get_folds(fold_type)
   if(fold_type == "targetgroup") {
-    bg <- load_background("targetgroup")
+    bg <- get_background("targetgroup")
   } else {
-    bg <- load_background("random")
+    bg <- get_background("random")
   }
 #   specieslist <- list()
 #   for (si in 1:length(species)) {
@@ -182,19 +182,19 @@ get_datadir <- function() {
 get_file <- function(filename) {
   datadir <- get_datadir()
 
-  outfile <- normalizePath(file.path(datadir, filename))
+  outfile <- file.path(datadir, filename)
   outfile_nozip <- file.path(datadir,sub("[.]zip$", "", filename))
   if(!file.exists(outfile) && !dir.exists(outfile_nozip)) {
     root <- paste0("http://www.phycology.ugent.be/research/marinespeed/", get_version(), "/")
     tryCatch({
       download.file(paste0(root, filename), outfile)
-    }, error = function(e) { remove.file(outfile)})
+    }, error = function(e) { file.remove(Doutfile)})
     if(grepl("[.]zip$", filename)) {
       unzip(outfile, exdir = outfile_nozip)
       file.remove(outfile)
     }
   }
-  outfile_nozip
+  normalizePath(outfile_nozip)
 }
 
 
@@ -210,12 +210,12 @@ get_species_names <- function(species) {
 
 
 
-#' Load folds
+#' Get folds
 #'
-#' \code{load_folds} returns the different pre-generated folds information. To
+#' \code{get_folds} returns the different pre-generated folds information. To
 #' get the fold data for a species see also \code{\link{get_fold_data}}.
 #'
-#' @usage load_folds(type = "disc")
+#' @usage get_folds(type = "disc")
 #'
 #' @param type character. The type of partitioning you want to load.
 #'
@@ -246,11 +246,11 @@ get_species_names <- function(species) {
 #'   \code{\link{kfold_data}}
 #'
 #' @examples \dontrun{
-#' folds <- load_folds("random")
+#' folds <- get_folds("random")
 #'
 #' abalistes <- "Abalistes stellatus"
 #' occ <- get_occurrences(abalistes)
-#' bg <- load_background("random")
+#' bg <- get_background("random")
 #'
 #' occ_train <- kfold_data(abalistes, occ, folds$species, k=1, training=TRUE)
 #' occ_test <- kfold_data(abalistes, occ, folds$species, k=1, training=FALSE)
@@ -258,7 +258,7 @@ get_species_names <- function(species) {
 #' bg_test <- kfold_data(abalistes, bg, folds$background, k=1, training=FALSE)
 #' }
 #' @export
-load_folds <- function(type = "disc") {
+get_folds <- function(type = "disc") {
   type <- as.character(type)
   if(type == "disc") {
     bg <- "pseudodisc_background_5cv_folds.csv.gz"
@@ -291,11 +291,11 @@ load_folds <- function(type = "disc") {
   list(background = bg_folds, species = species_folds)
 }
 
-#' Load background data
+#' Get background data
 #'
-#' \code{load_background} returns pre-generated background data.
+#' \code{get_background} returns pre-generated background data.
 #'
-#' @usage load_background(type)
+#' @usage get_background(type)
 #'
 #' @param type character. Either \code{"random"} or \code{"targetgroup"}.
 #'
@@ -306,17 +306,17 @@ load_folds <- function(type = "disc") {
 #' @return A dataframe with all background points.
 #'
 #' @seealso \code{\link{get_fold_data}} \code{\link{get_occurrences}}
-#'   \code{\link{load_folds}}
+#'   \code{\link{get_folds}}
 #'
 #' @examples \dontrun{
-#' random_bg <- load_background("random")
+#' random_bg <- get_background("random")
 #' plot(random_bg[,2:3], pch=".", main="random background")
 #'
-#' targetgroup_bg <- load_background("targetgroup")
+#' targetgroup_bg <- get_background("targetgroup")
 #' plot(targetgroup_bg[,2:3], pch=".", main="targetgroup background")
 #' }
 #' @export
-load_background <- function(type) {
+get_background <- function(type) {
   if(!(as.character(type) %in% c("random", "targetgroup"))) {
     stop("background type not recognized")
   }

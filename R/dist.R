@@ -1,3 +1,4 @@
+#' @importFrom geosphere distGeo
 get_distfun <- function(lonlat, dismo = FALSE) {
   if(lonlat) {
     if(dismo) {

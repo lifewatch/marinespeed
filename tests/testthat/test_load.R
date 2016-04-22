@@ -83,7 +83,7 @@ test_that("get_file works", {
   options(marinespeed_datadir=NULL)
 })
 
-test_that("load_folds works", {
+test_that("get_folds works", {
   setup_load()
   check_folds <- function(folds) {
     expect_equal(NCOL(folds$background),6)
@@ -91,17 +91,17 @@ test_that("load_folds works", {
     expect_more_than(NROW(folds$background),1000)
     expect_more_than(NROW(folds$species),10000)
   }
-  check_folds(load_folds("disc"))
-  check_folds(load_folds("random"))
-  check_folds(load_folds("targetgroup"))
+  check_folds(get_folds("disc"))
+  check_folds(get_folds("random"))
+  check_folds(get_folds("targetgroup"))
 })
 
-test_that("load_background works", {
+test_that("get_background works", {
   setup_load()
   check_background <- function(bg) {
     expect_more_than(NCOL(bg), 50)
     expect_more_than(NROW(bg), 1000)
   }
-  check_background(load_background("random"))
-  check_background(load_background("random"))
+  check_background(get_background("random"))
+  check_background(get_background("random"))
 })

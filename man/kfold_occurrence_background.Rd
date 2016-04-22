@@ -5,8 +5,8 @@
 \title{Create k folds of occurrence and background data for cross-validation}
 \usage{
 kfold_occurrence_background(occurrence_data, background_data,
-fold_type = "disc", k = 5, pwd_sample = TRUE, background_buffer = 200*1000,
-distfun = geosphere::distGeo)
+  occurrence_fold_type = "disc", k = 5, pwd_sample = TRUE, lonlat = TRUE,
+  background_buffer = 200*1000)
 }
 \arguments{
 \item{occurrence_data}{Dataframe. Occurrence points of the species, the first
@@ -51,31 +51,34 @@ column for each fold.
 }
 \details{
 Note that which and how many background points get selected in each
-fold depends on the \code{fold_type}, \code{pwd_sample} and the
-\code{background_buffer} and whether \code{pwd_sample} is \code{TRUE} or
-\code{FALSE}, even leading in some cases to the selection of no background
-data. Background points that are neither selected for the training fold nor
-for the test fold are set to \code{NA} in the background folds. Random
-assignment of background points to the folds can be achieved by setting
-\code{pwd_sample} to \code{FALSE} and \code{background_buffer} to 0. Note
-also that when \code{pwd_sample} is \code{TRUE}, the same background point
-might be assigned to different folds.
+  fold depends on the \code{fold_type}, \code{pwd_sample} and the
+  \code{background_buffer} and whether \code{pwd_sample} is \code{TRUE} or
+  \code{FALSE}, even leading in some cases to the selection of no background
+  data. Background points that are neither selected for the training fold nor
+  for the test fold are set to \code{NA} in the background folds. Random
+  assignment of background points to the folds can be achieved by setting
+  \code{pwd_sample} to \code{FALSE} and \code{background_buffer} to 0. Note
+  also that when \code{pwd_sample} is \code{TRUE}, the same background point
+  might be assigned to different folds.
 }
 \examples{
 set.seed(42)
-occurrence_data <- data.frame(species = rep("Abalistes stellatus", 50), longitude = runif(50, -180, 180), latitude = runif(50, -90, 90))
-background_data <- data.frame(species = rep("background", 10000), longitude = runif(1000, -180, 180), latitude = runif(1000, -90, 90))
+occurrence_data <- data.frame(species = rep("Abalistes stellatus", 50),
+                              longitude = runif(50, -180, 180), latitude = runif(50, -90, 90))
+background_data <- data.frame(species = rep("background", 10000),
+                              longitude = runif(1000, -180, 180), latitude = runif(1000, -90, 90))
 disc_folds <- kfold_occurrence_background(occurrence_data, background_data, "disc")
-random_folds <- kfold_occurrence_background(occurrence_data, background_data, "random", pwd_sample = FALSE, background_buffer = 0)
+random_folds <- kfold_occurrence_background(occurrence_data, background_data, "random",
+                                            pwd_sample = FALSE, background_buffer = 0)
 
 }
 \references{
 Hijmans, R. J. (2012). Cross-validation of species distribution
-models: removing spatial sorting bias and calibration with a null model.
-Ecology, 93(3), 679–688. doi:10.1890/11-0826.1 Radosavljevic, A., & Anderson,
-R. P. (2013). Making better Maxent models of species distributions:
-complexity, overfitting and evaluation. Journal of Biogeography.
-doi:10.1111/jbi.12227
+  models: removing spatial sorting bias and calibration with a null model.
+  Ecology, 93(3), 679–688. doi:10.1890/11-0826.1 Radosavljevic, A., &
+  Anderson, R. P. (2013). Making better Maxent models of species
+  distributions: complexity, overfitting and evaluation. Journal of
+  Biogeography. doi:10.1111/jbi.12227
 }
 \seealso{
 \code{\link{kfold_disc}} \code{\link{geographic_filter}}

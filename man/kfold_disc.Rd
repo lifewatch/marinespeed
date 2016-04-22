@@ -4,7 +4,7 @@
 \alias{kfold_disc}
 \title{Create k disc based folds for cross-validation}
 \usage{
-kfold_disc(data, k = 5, distfun = geosphere::distGeo)
+kfold_disc(data, k = 5, lonlat = TRUE)
 }
 \arguments{
 \item{data}{Matrix or dataframe. The first two columns should represent the

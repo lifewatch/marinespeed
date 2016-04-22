@@ -4,8 +4,8 @@
 \alias{geographic_filter}
 \title{Filter points based on distance to other points}
 \usage{
-geographic_filter(data, filter_data, lonlat = TRUE,
-bufferdistance=200*1000)
+geographic_filter(data, filter_data, buffer_distance = 200*1000,
+  lonlat = TRUE)
 }
 \arguments{
 \item{data}{Matrix or dataframe. The first two columns should represent the
@@ -15,25 +15,26 @@ longitude and latitude (or x,y coordinates if \code{lonlat = FALSE}).}
 represent the longitude and latitude (or x,y coordinates if \code{lonlat =
 FALSE}).}
 
-\item{lonlat}{Logical. If \code{TRUE} (default) then Great Circle distances
-are calculated else Euclidean (planar) distances are calculated.}
-
 \item{buffer_distance}{Positive number. The minimal distance a point in
 \code{data} should be from a point in \code{filter_data}.}
+
+\item{lonlat}{Logical. If \code{TRUE} (default) then Great Circle distances
+are calculated else Euclidean (planar) distances are calculated.}
 }
 \value{
 Vector of integer with the indexes of the rows in data that are not
   within bufferdistance of the filter_data.
 }
 \description{
-Filter points based on distance to other points
+\code{geographic_filter} returns the indexes of all points in \code{data}
+that are not within \code{bufferdistance} of the \code{filter_data}.
 }
 \examples{
 set.seed(42)
 data <- cbind(runif(10, -180, 180), runif(10, -90, 90))
 filter_data <- cbind(runif(10, -180, 180), runif(10, -90, 90))
 ## remove points from data data are within a 1000km buffer around the points in filter_data
-filtered <- geographic_filter(data, filter_data, lonlat = TRUE, buffer_distance = 1000*1000)
+filtered <- geographic_filter(data, filter_data, buffer_distance = 1000*1000, lonlat = TRUE)
 
 data_filtered <- data[filtered,]
 data_removed <- data[-filtered,]

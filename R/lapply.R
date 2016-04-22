@@ -55,8 +55,8 @@ lapply_species <- function(fun, ..., species = NULL, raw = FALSE) {
 #' result of applying \code{fun} to all species or the provided subset of
 #' species for the specified folds.
 #'
-#' @usage lapply_kfold_species(fun, ..., k = 1:5, fold_type = "disc", species =
-#'   NULL, raw = FALSE)
+#' @usage lapply_kfold_species(fun, ..., species = NULL, fold_type = "disc", k =
+#'   1:5)
 #'
 #' @param fun function. The function to be applied to the occurrence records of
 #'   each species. Parameters are the species name and a dataframe with the
@@ -108,7 +108,8 @@ lapply_species <- function(fun, ..., species = NULL, raw = FALSE) {
 #'    points(data$occurrence_test[,c("longitude", "latitude")], pch=".", col="red")
 #' }
 #'
-#' # plot training (blue) and test (red) occurrences of the first 2 folds for the first 10 species
+#' # plot training (blue) and test (red) occurrences
+#' # of the first 2 folds for the first 10 species
 #' species <- list_species()
 #' lapply_kfold_species(plot_occurrences, species=species[1:10,],
 #'                      fold_type = "disc", k = 1:2)
@@ -122,11 +123,11 @@ lapply_kfold_species <- function(fun, ..., species = NULL, fold_type = "disc", k
   }
   species <- get_species_names(species)
 
-  folds <- load_folds(fold_type)
+  folds <- get_folds(fold_type)
   if(fold_type == "targetgroup") {
-    bg <- load_background("targetgroup")
+    bg <- get_background("targetgroup")
   } else {
-    bg <- load_background("random")
+    bg <- get_background("random")
   }
 
   for(i in 1:NROW(species)) {
@@ -143,7 +144,7 @@ lapply_kfold_species <- function(fun, ..., species = NULL, fold_type = "disc", k
       bg_test$species <- rep("background", nrow(bg_test))
       data <- list(occurrence_training=occ_train, occurrence_test=occ_test,
                    background_training=bg_train, background_test=bg_test)
-      klist[[ki]] <- fun(sp, data, ...)
+      klist[[ki]] <- fun(species=sp, data=data, fold=ki, ...)
     }
     result[[sp]] <- klist
   }
