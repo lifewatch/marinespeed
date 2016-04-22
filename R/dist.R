@@ -1,20 +1,3 @@
-#' @importFrom geosphere distGeo
-get_distfun <- function(lonlat, dismo = FALSE) {
-  if(lonlat) {
-    if(dismo) {
-      dismo_distGeo
-    } else {
-      geosphere::distGeo
-    }
-  } else {
-    if(dismo) {
-      dismo_distPlane
-    } else {
-      dist_plane
-    }
-  }
-}
-
 lonlat_xyz <- function(data, lonlat_cols) {
   rad_coordinates <- data[,lonlat_cols] * (pi/180)
   lon <- rad_coordinates[,lonlat_cols[1]]
@@ -59,4 +42,45 @@ dismo_distPlane <- function(x, y) {
     dm[i, ] = dist_plane(x[i, , drop = FALSE], y)
   }
   return(dm)
+}
+
+#' @importFrom geosphere distGeo
+get_distfun <- function(lonlat, dismo = FALSE) {
+  if(lonlat) {
+    if(dismo) {
+      dismo_distGeo
+    } else {
+      geosphere::distGeo
+    }
+  } else {
+    if(dismo) {
+      dismo_distPlane
+    } else {
+      dist_plane
+    }
+  }
+}
+
+mindist <- function(distfun, a, b, lonlat) {
+  if(requireNamespace("FNN")) {
+    if(lonlat) {
+      az <- lonlat_xyz(a,1:2)
+      bz <- lonlat_xyz(b,1:2)
+      nn <- FNN::get.knnx(bz, az, k=1)
+      sapply(1:(nrow(a)), function(i) distfun(a[i,,drop=F], b[nn$nn.index[i],,drop=F]))
+    } else {
+      nn <- FNN::get.knnx(b, a, k=1)
+      nn$nn.dist
+    }
+  } else {
+    warning("package FNN not found, using a slower approach")
+    partition_count <- (1 %/% (1000 / NROW(b))) + 1
+    parts <- dismo::kfold(x=b, k=partition_count)
+    r <- c()
+    for(i in 1:partition_count) {
+      mind <- apply(distfun(a, b[parts==i,]), 1, min)
+      r <- cbind(r, mind)
+    }
+    apply(r, 1, min)
+  }
 }

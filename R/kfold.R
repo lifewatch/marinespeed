@@ -21,22 +21,22 @@
 #' @examples
 #' ## random data folds
 #' set.seed(42)
-#' occurrence_data <- data.frame(species = rep("Abalistes stellatus", 50),
-#'                               longitude = runif(50, -180, 180), latitude = runif(50, -90, 90))
-#' background_data <- data.frame(species = rep("background", 10000),
-#'                               longitude = runif(1000, -180, 180), latitude = runif(1000, -90, 90))
-#' folds <- kfold_occurrence_background(occurrence_data, background_data)
+#' occ_data <- data.frame(species = rep("Abalistes stellatus", 50),
+#'                        longitude = runif(50, -180, 180), latitude = runif(50, -90, 90))
+#' bg_data <- data.frame(species = rep("background", 1000),
+#'                       longitude = runif(1000, -180, 180), latitude = runif(1000, -90, 90))
+#' folds <- kfold_occurrence_background(occ_data, bg_data)
 #' ## alternative with real data (but see also the function get_fold_data)
-#' # occurrence_data <- get_occurrences("Abalistes stellatus")
-#' # background_data <- load_background("random")
+#' # occ_data <- get_occurrences("Abalistes stellatus")
+#' # bg_data <- load_background("random")
 #' # folds <- load_folds("random")
 #'
 #' ## get training and test data for the first fold
-#' occ_training <- kfold_data("Abalistes stellatus", occurrence_data, folds, k = 1, training = TRUE)
-#' occ_test <- kfold_data("Abalistes stellatus", occurrence_data, folds, k = 1, training = FALSE)
+#' occ_training <- kfold_data("Abalistes stellatus", occ_data, folds$occurrence, k = 1, training = TRUE)
+#' occ_test <- kfold_data("Abalistes stellatus", occ_data, folds$occurrence, k = 1, training = FALSE)
 #'
-#' bg_training <- kfold_data("Abalistes stellatus", background_data, folds, k = 1, training = TRUE)
-#' bg_test <- kfold_data("Abalistes stellatus", background_data, folds, k = 1, training = FALSE)
+#' bg_training <- kfold_data("Abalistes stellatus", bg_data, folds$background, k = 1, training = TRUE)
+#' bg_test <- kfold_data("Abalistes stellatus", bg_data, folds$background, k = 1, training = FALSE)
 #'
 #' @export
 kfold_data <- function(species_name, data, folds, k, training) {
@@ -101,7 +101,7 @@ kfold_data <- function(species_name, data, folds, k, training) {
 #'
 #' @references Hijmans, R. J. (2012). Cross-validation of species distribution
 #'   models: removing spatial sorting bias and calibration with a null model.
-#'   Ecology, 93(3), 679–688. doi:10.1890/11-0826.1 Radosavljevic, A., &
+#'   Ecology, 93(3), 679-688. doi:10.1890/11-0826.1 Radosavljevic, A., &
 #'   Anderson, R. P. (2013). Making better Maxent models of species
 #'   distributions: complexity, overfitting and evaluation. Journal of
 #'   Biogeography. doi:10.1111/jbi.12227
@@ -145,7 +145,7 @@ kfold_occurrence_background <- function(occurrence_data, background_data, occurr
     occurrence_training <- occurrence_data[occurrence_partitions != ki, 2:3]
 
     if(pwd_sample) {
-      test_sample <- marinespeed:::pwdSample(occurrence_test, background_data[,2:3], occurrence_training, n=5) ## try to get 5 background points for each testing presence point, you'll get less than that
+      test_sample <- dismo_pwdSample(occurrence_test, background_data[,2:3], occurrence_training, n=5) ## try to get 5 background points for each testing presence point, you'll get less than that
     } else {
       test_sample <- which(background_partitions==ki) ## use randomly generated partitions
     }
@@ -153,7 +153,7 @@ kfold_occurrence_background <- function(occurrence_data, background_data, occurr
     background_training_i <- base::setdiff(1:NROW(background_data), background_test_i)
 
     if(background_buffer > 0) {
-      filtered <- geographic_filter(background_data[background_training_i,2:3], occurrence_test, lonlat, background_buffer)
+      filtered <- geographic_filter(background_data[background_training_i,2:3], occurrence_test, background_buffer, lonlat)
       background_training_i <- (1:NROW(background_data))[background_training_i][filtered]
     }
 

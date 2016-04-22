@@ -48,6 +48,11 @@ The different \code{fold_type} are:
 \examples{
 \dontrun{
 aba_folds <- get_fold_data("Abalistes stellatus", "random", k = 1:5)
+k1 <- aba_folds[[1]]
+k1$occurrence_training
+k1$occurrence_test
+k1$background_training
+k1$background_test
 }
 }
 \seealso{

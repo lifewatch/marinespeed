@@ -1,7 +1,5 @@
-#' Spatial sorting bias
-#'
-#' For more information see \code{\link[dismo]{ssb}}
-ssb <- function(p, a, reference, lonlat = TRUE, avg = TRUE) {
+#' @importFrom sp coordinates
+dismo_ssb <- function(p, a, reference, lonlat = TRUE, avg = TRUE) {
   distfun <- get_distfun(lonlat, dismo = TRUE)
   if (inherits(p, "SpatialPoints"))
     p <- sp::coordinates(p)
@@ -13,31 +11,8 @@ ssb <- function(p, a, reference, lonlat = TRUE, avg = TRUE) {
   a <- as.matrix(a)[, 1:2]
   reference <- as.matrix(reference)[, 1:2]
 
-  mindist <- function(distfun, a, b) {
-    if(requireNamespace(FNN)) {
-      if(lonlat) {
-        az <- lonlat_xyz(a,1:2)
-        bz <- lonlat_xyz(b,1:2)
-        nn <- FNN::get.knnx(bz, az, k=1)
-        sapply(1:(nrow(a)), function(i) distfun(a[i,,drop=F], b[nn$nn.index[i],,drop=F]))
-      } else {
-        nn <- FNN::get.knnx(b, a, k=1)
-        nn$nn.dist
-      }
-    } else {
-      warning("package FNN not found, using a slower approach")
-      partition_count <- (1 %/% (1000 / NROW(b))) + 1
-      parts <- dismo::kfold(x=b, k=partition_count)
-      r <- c()
-      for(i in 1:partition_count) {
-        mind <- apply(distfun(a, b[parts==i,]), 1, min)
-        r <- cbind(r, mind)
-      }
-      apply(r, 1, min)
-    }
-  }
-  pd <- mindist(distfun, p, reference) #   pd <- apply(distfun(p, reference), 1, min)
-  ad <- mindist(distfun, a, reference) #   ad <- apply(distfun(a, reference), 1, min)
+  pd <- mindist(distfun, p, reference, lonlat) #   pd <- apply(distfun(p, reference), 1, min)
+  ad <- mindist(distfun, a, reference, lonlat) #   ad <- apply(distfun(a, reference), 1, min)
   if (avg) {
     res <- cbind(mean(pd), mean(ad))
     colnames(res) <- c("p", "a")
@@ -48,10 +23,8 @@ ssb <- function(p, a, reference, lonlat = TRUE, avg = TRUE) {
   }
 }
 
-#' Pair-wise distance sampling
-#'
-#' For more information see \code{\link[dismo]{pwdSample}}
-pwdSample <- function(fixed, sample, reference, tr = 0.33, nearest= TRUE, n=1, lonlat = TRUE, warn = TRUE) {
+#' @importFrom sp coordinates
+dismo_pwdSample <- function(fixed, sample, reference, tr = 0.33, nearest= TRUE, n=1, lonlat = TRUE, warn = TRUE) {
   distfun <- get_distfun(lonlat, dismo = TRUE)
   stopifnot(tr > 0)
   n <- round(n)
@@ -70,32 +43,8 @@ pwdSample <- function(fixed, sample, reference, tr = 0.33, nearest= TRUE, n=1, l
       warning("nrow(sample) < nrow(fixed)")
     }
   }
-  mindist <- function(distfun, a, b) {
-    if(require(FNN)) {
-      if(lonlat) {
-        az <- lonlat_xyz(a,1:2)
-        bz <- lonlat_xyz(b,1:2)
-        nn <- FNN::get.knnx(bz, az, k=1)
-        sapply(1:(nrow(a)), function(i) distfun(a[i,,drop=F], b[nn$nn.index[i],,drop=F]))
-      } else {
-        nn <- FNN::get.knnx(b, a, k=1)
-        nn$nn.dist
-      }
-    } else {
-      warning("package FNN not found, using a slower approach")
-      partition_count <- (1 %/% (1000 / NROW(b))) + 1
-      parts <- dismo::kfold(x=b, k=partition_count)
-      r <- c()
-      for(i in 1:partition_count) {
-        mind <- apply(distfun(a, b[parts==i,]), 1, min)
-        r <- cbind(r, mind)
-      }
-      apply(r, 1, min)
-    }
-  }
-
-  fromd <- mindist(distfun, fixed, reference) ##apply(distfun(fixed, reference), 1, min)
-  tod <- mindist(distfun, sample, reference) ##apply(distfun(sample, reference), 1, min)
+  fromd <- mindist(distfun, fixed, reference, lonlat) ##apply(distfun(fixed, reference), 1, min)
+  tod <- mindist(distfun, sample, reference, lonlat) ##apply(distfun(sample, reference), 1, min)
   ngb <- matrix(NA, nrow = length(fromd), ncol = n)
   iter <- sample(1:nrow(fixed))
   for (j in 1:n) {

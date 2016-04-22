@@ -20,34 +20,37 @@ test_that("lapply_species works", {
     speciesname
   }
   results <- lapply_species(validate_species, species_check = NULL)
-  expect_equal(length(results), nrow(species_list))
+  expect_equal(length(results), NROW(species_list))
 
-  results <- lapply_species(validate_species, species_check=species_list[1:5,1] , species=species_list[1:5,])
+  results <- lapply_species(validate_species, species_check=species_list[1:5] , species=species_list[1:5])
   expect_equal(length(results), 5)
 })
 
 test_that("lapply_kfold_species works", {
   skip()
-  species_list <- list_species()
+  species_list <- list_species()[,1]
   validate_species <- function(speciesname, data, fold, species_check, folds_check) {
     if(is.null(species_check)) {
       species_check <- species_list
     }
     expect_true(speciesname %in% species_check)
     expect_true(fold %in% folds_check)
-    expect_more_than(nrow(data$occurrences_training), 0)
-    expect_more_than(nrow(data$occurrences_test), 0)
+    expect_more_than(nrow(data$occurrence_training), 0)
+    expect_more_than(nrow(data$occurrence_test), 0)
     expect_more_than(nrow(data$background_training), 0)
     expect_more_than(nrow(data$background_test), 0)
     speciesname
   }
 
-  results <- lapply_kfold_species(validate_species, species_check=species_list[3:15,1], folds_check=2, k=2, species=species_list[3:15,])
-  expect_equal(length(results), 5)
-  expect_equal(length(results[[1]]), 1)
-  results <- lapply_kfold_species(validate_species, species_check=species_list[3:15,1], folds_check=3:4, k=3:4, species=species_list[3:15,1], fold_type="random")
-  expect_equal(length(results), 5)
-  expect_equal(length(results[[1]]), 2)
+  results <- lapply_kfold_species(validate_species, species_check=species_list[3:15], folds_check=2, k=2, species=species_list[3:15])
+  expect_equal(length(results), 13)
+  expect_true(is.null(results[[1]][[1]]))
+  expect_false(is.null(results[[1]][[2]]))
+  results <- lapply_kfold_species(validate_species, species_check=species_list[3:15], folds_check=3:4, k=3:4, species=species_list[3:15], fold_type="random")
+  expect_equal(length(results), 13)
+  expect_true(is.null(results[[1]][[1]]))
+  expect_false(is.null(results[[1]][[3]]))
+  expect_false(is.null(results[[1]][[4]]))
 })
 
 

@@ -75,7 +75,7 @@ random_folds <- kfold_occurrence_background(occurrence_data, background_data, "r
 \references{
 Hijmans, R. J. (2012). Cross-validation of species distribution
   models: removing spatial sorting bias and calibration with a null model.
-  Ecology, 93(3), 679–688. doi:10.1890/11-0826.1 Radosavljevic, A., &
+  Ecology, 93(3), 679-688. doi:10.1890/11-0826.1 Radosavljevic, A., &
   Anderson, R. P. (2013). Making better Maxent models of species
   distributions: complexity, overfitting and evaluation. Journal of
   Biogeography. doi:10.1111/jbi.12227

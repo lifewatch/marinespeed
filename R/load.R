@@ -110,6 +110,11 @@ get_occurrences <- function(species = NULL, raw = FALSE) {
 #'
 #' @examples \dontrun{
 #' aba_folds <- get_fold_data("Abalistes stellatus", "random", k = 1:5)
+#' k1 <- aba_folds[[1]]
+#' k1$occurrence_training
+#' k1$occurrence_test
+#' k1$background_training
+#' k1$background_test
 #' }
 #' @export
 get_fold_data <- function(species, fold_type, k) {
@@ -188,7 +193,7 @@ get_file <- function(filename) {
     root <- paste0("http://www.phycology.ugent.be/research/marinespeed/", get_version(), "/")
     tryCatch({
       download.file(paste0(root, filename), outfile)
-    }, error = function(e) { file.remove(Doutfile)})
+    }, error = function(e) { file.remove(outfile)})
     if(grepl("[.]zip$", filename)) {
       unzip(outfile, exdir = outfile_nozip)
       file.remove(outfile)

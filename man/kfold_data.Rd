@@ -32,22 +32,22 @@ fold. The get data from pre-made folds use \code{\link{get_fold_data}}
 \examples{
 ## random data folds
 set.seed(42)
-occurrence_data <- data.frame(species = rep("Abalistes stellatus", 50),
-                              longitude = runif(50, -180, 180), latitude = runif(50, -90, 90))
-background_data <- data.frame(species = rep("background", 10000),
-                              longitude = runif(1000, -180, 180), latitude = runif(1000, -90, 90))
-folds <- kfold_occurrence_background(occurrence_data, background_data)
+occ_data <- data.frame(species = rep("Abalistes stellatus", 50),
+                       longitude = runif(50, -180, 180), latitude = runif(50, -90, 90))
+bg_data <- data.frame(species = rep("background", 1000),
+                      longitude = runif(1000, -180, 180), latitude = runif(1000, -90, 90))
+folds <- kfold_occurrence_background(occ_data, bg_data)
 ## alternative with real data (but see also the function get_fold_data)
-# occurrence_data <- get_occurrences("Abalistes stellatus")
-# background_data <- load_background("random")
+# occ_data <- get_occurrences("Abalistes stellatus")
+# bg_data <- load_background("random")
 # folds <- load_folds("random")
 
 ## get training and test data for the first fold
-occ_training <- kfold_data("Abalistes stellatus", occurrence_data, folds, k = 1, training = TRUE)
-occ_test <- kfold_data("Abalistes stellatus", occurrence_data, folds, k = 1, training = FALSE)
+occ_training <- kfold_data("Abalistes stellatus", occ_data, folds$occurrence, k = 1, training = TRUE)
+occ_test <- kfold_data("Abalistes stellatus", occ_data, folds$occurrence, k = 1, training = FALSE)
 
-bg_training <- kfold_data("Abalistes stellatus", background_data, folds, k = 1, training = TRUE)
-bg_test <- kfold_data("Abalistes stellatus", background_data, folds, k = 1, training = FALSE)
+bg_training <- kfold_data("Abalistes stellatus", bg_data, folds$background, k = 1, training = TRUE)
+bg_test <- kfold_data("Abalistes stellatus", bg_data, folds$background, k = 1, training = FALSE)
 
 }
 
