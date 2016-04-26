@@ -4,7 +4,7 @@
 \alias{kfold_data}
 \title{Get the data associated with a fold}
 \usage{
-kfold_data(species_name, data, folds, k, training)
+kfold_data(species_name, data, folds, fold, training)
 }
 \arguments{
 \item{species_name}{Character vector. The name of the species you want get
@@ -17,7 +17,7 @@ fold data for.}
 \code{kfold_species_background}. Essentially a data.frame with a species
 column and the k-fold cross-validation logical vectors.}
 
-\item{k}{Integer. Indicate which kth fold you want to return data for.}
+\item{fold}{Integer. Indicate which kth fold you want to return data for.}
 
 \item{training}{Logical. If \code{TRUE} then training data is returned else
 if \code{FALSE} then test data is returned.}
@@ -43,11 +43,11 @@ folds <- kfold_occurrence_background(occ_data, bg_data)
 # folds <- load_folds("random")
 
 ## get training and test data for the first fold
-occ_training <- kfold_data("Abalistes stellatus", occ_data, folds$occurrence, k = 1, training = TRUE)
-occ_test <- kfold_data("Abalistes stellatus", occ_data, folds$occurrence, k = 1, training = FALSE)
+occ_training <- kfold_data("Abalistes stellatus", occ_data, folds$occurrence, fold = 1, training = TRUE)
+occ_test <- kfold_data("Abalistes stellatus", occ_data, folds$occurrence, fold = 1, training = FALSE)
 
-bg_training <- kfold_data("Abalistes stellatus", bg_data, folds$background, k = 1, training = TRUE)
-bg_test <- kfold_data("Abalistes stellatus", bg_data, folds$background, k = 1, training = FALSE)
+bg_training <- kfold_data("Abalistes stellatus", bg_data, folds$background, fold = 1, training = TRUE)
+bg_test <- kfold_data("Abalistes stellatus", bg_data, folds$background, fold = 1, training = FALSE)
 
 }
 

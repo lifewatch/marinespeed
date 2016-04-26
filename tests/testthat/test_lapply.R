@@ -39,7 +39,7 @@ test_that("lapply_kfold_species works", {
     expect_more_than(nrow(data$occurrence_test), 0)
     expect_more_than(nrow(data$background_training), 0)
     expect_more_than(nrow(data$background_test), 0)
-    speciesname
+    data$occurrence_training[,"longitude"]
   }
 
   results <- lapply_kfold_species(validate_species, species_check=species_list[3:15], folds_check=2, k=2, species=species_list[3:15])
@@ -51,6 +51,8 @@ test_that("lapply_kfold_species works", {
   expect_true(is.null(results[[1]][[1]]))
   expect_false(is.null(results[[1]][[3]]))
   expect_false(is.null(results[[1]][[4]]))
+  ## fold records should be different
+  expect_more_than(length(setdiff(results[[1]][[3]], results[[1]][[4]])), length(results[[1]][[4]]) / 6)
 })
 
 

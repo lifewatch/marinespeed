@@ -68,6 +68,8 @@ test_that("get_fold_data random", {
   expect_null(folds[[3]])
   check_fold(folds[[4]])
   expect_null(folds[[5]])
+  ## fold records should be different
+  expect_more_than(length(setdiff(folds[[2]]$occurrence_training[,"longitude"], folds[[4]]$occurrence_training[,"longitude"])), nrow(folds[[2]]$occurrence_training) / 6)
 })
 
 test_that("get_file works", {

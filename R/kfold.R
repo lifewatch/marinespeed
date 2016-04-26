@@ -3,7 +3,7 @@
 #' \code{kfold_data} returns rows from data for a specific species for the kth
 #' fold. The get data from pre-made folds use \code{\link{get_fold_data}}
 #'
-#' @usage kfold_data(species_name, data, folds, k, training)
+#' @usage kfold_data(species_name, data, folds, fold, training)
 #'
 #' @param species_name Character vector. The name of the species you want get
 #'   the fold data for.
@@ -12,7 +12,7 @@
 #' @param folds Dataframe. The occurrence or background folds as created by
 #'   \code{kfold_species_background}. Essentially a data.frame with a species
 #'   column and the k-fold cross-validation logical vectors.
-#' @param k Integer. Indicate which kth fold you want to return data for.
+#' @param fold Integer. Indicate which kth fold you want to return data for.
 #' @param training Logical. If \code{TRUE} then training data is returned else
 #'   if \code{FALSE} then test data is returned.
 #'
@@ -32,17 +32,20 @@
 #' # folds <- load_folds("random")
 #'
 #' ## get training and test data for the first fold
-#' occ_training <- kfold_data("Abalistes stellatus", occ_data, folds$occurrence, k = 1, training = TRUE)
-#' occ_test <- kfold_data("Abalistes stellatus", occ_data, folds$occurrence, k = 1, training = FALSE)
+#' occ_training <- kfold_data("Abalistes stellatus", occ_data, folds$occurrence, fold = 1, training = TRUE)
+#' occ_test <- kfold_data("Abalistes stellatus", occ_data, folds$occurrence, fold = 1, training = FALSE)
 #'
-#' bg_training <- kfold_data("Abalistes stellatus", bg_data, folds$background, k = 1, training = TRUE)
-#' bg_test <- kfold_data("Abalistes stellatus", bg_data, folds$background, k = 1, training = FALSE)
+#' bg_training <- kfold_data("Abalistes stellatus", bg_data, folds$background, fold = 1, training = TRUE)
+#' bg_test <- kfold_data("Abalistes stellatus", bg_data, folds$background, fold = 1, training = FALSE)
 #'
 #' @export
-kfold_data <- function(species_name, data, folds, k, training) {
-  kcol <- paste0("k",k)
+kfold_data <- function(species_name, data, folds, fold, training) {
+  if(length(fold) != 1) {
+    stop("fold should be of length 1")
+  }
+  kcol <- paste0("k",fold)
   if(!all(kcol %in% colnames(folds))) {
-    stop("k not found in folds")
+    stop("fold not found in folds")
   }
   filter <- c(as.character(species_name), "background")
   f <- folds[as.character(folds$species) %in% filter, kcol] == training
