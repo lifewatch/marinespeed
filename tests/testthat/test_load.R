@@ -53,8 +53,14 @@ test_that("get_fold_data random", {
   check_fold <- function(fold) {
     expect_more_than(NROW(fold$occurrence_training), 10)
     expect_more_than(NROW(fold$occurrence_test), 10)
+    expect_true(all(complete.cases(fold$occurrence_training)))
+    expect_true(all(complete.cases(fold$occurrence_test)))
+    expect_false(NROW(fold$occurrence_training) == NROW(fold$occurrence_test))
     expect_more_than(NROW(fold$background_training), 1000)
     expect_more_than(NROW(fold$background_test), 100)
+    expect_true(all(complete.cases(fold$background_training)))
+    expect_true(all(complete.cases(fold$background_test)))
+    expect_false(NROW(fold$background_training) == NROW(fold$background_test))
     expect_more_than(NCOL(fold$occurrence_training), 50)
     expect_equal(NCOL(fold$occurrence_test), NCOL(fold$occurrence_training))
     expect_equal(NCOL(fold$background_training), NCOL(fold$occurrence_training))
@@ -70,6 +76,20 @@ test_that("get_fold_data random", {
   expect_null(folds[[5]])
   ## fold records should be different
   expect_more_than(length(setdiff(folds[[2]]$occurrence_training[,"longitude"], folds[[4]]$occurrence_training[,"longitude"])), nrow(folds[[2]]$occurrence_training) / 6)
+
+  folds_random <- folds
+
+  folds <- get_fold_data("Abalistes stellatus", fold_type = "disc", k=c(2,4))
+
+  expect_null(folds[[1]])
+  check_fold(folds[[2]])
+  expect_null(folds[[3]])
+  check_fold(folds[[4]])
+  expect_null(folds[[5]])
+  ## fold records should be different
+  expect_more_than(length(setdiff(folds[[2]]$occurrence_training[,"longitude"], folds[[4]]$occurrence_training[,"longitude"])), nrow(folds[[2]]$occurrence_training) / 6)
+
+  ## random should be different from disc fold
 })
 
 test_that("get_file works", {
