@@ -28,7 +28,7 @@ test_that("list species", {
   setup_load()
 
   species <- list_species()
-  expect_more_than(NROW(species), 500)
+  expect_gt(NROW(species), 500)
   expect_equal(NCOL(species), 2)
   expect_equal(colnames(species), c("species", "aphia_id"))
 })
@@ -37,13 +37,13 @@ test_that("get occurrences works", {
   setup_load()
 
   abalistes_stellatus <- get_occurrences("Abalistes stellatus")
-  expect_more_than(NROW(abalistes_stellatus), 10)
-  expect_more_than(NCOL(abalistes_stellatus), 50)
+  expect_gt(NROW(abalistes_stellatus), 10)
+  expect_gt(NCOL(abalistes_stellatus), 50)
 
   species <- list_species()
   occ <- get_occurrences(species[1:3,])
-  expect_more_than(NROW(occ), 10)
-  expect_more_than(NCOL(occ), 50)
+  expect_gt(NROW(occ), 10)
+  expect_gt(NCOL(occ), 50)
   expect_equal(length(unique(occ$species)), 3)
 })
 
@@ -51,23 +51,22 @@ test_that("get_fold_data random", {
   setup_load()
 
   check_fold <- function(fold) {
-    expect_more_than(NROW(fold$occurrence_training), 10)
-    expect_more_than(NROW(fold$occurrence_test), 10)
+    expect_gt(NROW(fold$occurrence_training), 10)
+    expect_gt(NROW(fold$occurrence_test), 10)
     expect_true(all(complete.cases(fold$occurrence_training)))
     expect_true(all(complete.cases(fold$occurrence_test)))
     expect_false(NROW(fold$occurrence_training) == NROW(fold$occurrence_test))
-    expect_more_than(NROW(fold$background_training), 1000)
-    expect_more_than(NROW(fold$background_test), 100)
+    expect_gt(NROW(fold$background_training), 1000)
     expect_true(all(complete.cases(fold$background_training)))
     expect_true(all(complete.cases(fold$background_test)))
     expect_false(NROW(fold$background_training) == NROW(fold$background_test))
-    expect_more_than(NCOL(fold$occurrence_training), 50)
+    expect_gt(NCOL(fold$occurrence_training), 50)
     expect_equal(NCOL(fold$occurrence_test), NCOL(fold$occurrence_training))
     expect_equal(NCOL(fold$background_training), NCOL(fold$occurrence_training))
     expect_equal(NCOL(fold$background_test), NCOL(fold$occurrence_test))
   }
 
-  folds <- get_fold_data("Abalistes stellatus", fold_type = "random", k=c(2,4))
+  folds <- get_fold_data("Abra alba", fold_type = "random", k=c(2,4))
 
   expect_null(folds[[1]])
   check_fold(folds[[2]])
@@ -75,11 +74,11 @@ test_that("get_fold_data random", {
   check_fold(folds[[4]])
   expect_null(folds[[5]])
   ## fold records should be different
-  expect_more_than(length(setdiff(folds[[2]]$occurrence_training[,"longitude"], folds[[4]]$occurrence_training[,"longitude"])), nrow(folds[[2]]$occurrence_training) / 6)
+  expect_gt(length(setdiff(folds[[2]]$occurrence_training[,"longitude"], folds[[4]]$occurrence_training[,"longitude"])), nrow(folds[[2]]$occurrence_training) / 6)
 
   folds_random <- folds
 
-  folds <- get_fold_data("Abalistes stellatus", fold_type = "disc", k=c(2,4))
+  folds <- get_fold_data("Abra alba", fold_type = "disc", k=c(2,4))
 
   expect_null(folds[[1]])
   check_fold(folds[[2]])
@@ -87,9 +86,14 @@ test_that("get_fold_data random", {
   check_fold(folds[[4]])
   expect_null(folds[[5]])
   ## fold records should be different
-  expect_more_than(length(setdiff(folds[[2]]$occurrence_training[,"longitude"], folds[[4]]$occurrence_training[,"longitude"])), nrow(folds[[2]]$occurrence_training) / 6)
+  expect_gt(length(setdiff(folds[[2]]$occurrence_training[,"longitude"], folds[[4]]$occurrence_training[,"longitude"])), nrow(folds[[2]]$occurrence_training) / 6)
 
   ## random should be different from disc fold
+  expect_gt(length(setdiff(folds[[2]]$occurrence_training[,"longitude"], folds_random[[2]]$occurrence_training[,"longitude"])), nrow(folds[[2]]$occurrence_training) / 10)
+
+
+  folds <- get_fold_data("Dinoperca petersi", fold_type = "disc", k=1:5)
+  lapply(folds, check_fold)
 })
 
 test_that("get_file works", {
@@ -99,7 +103,7 @@ test_that("get_file works", {
   file <- get_file("species.csv.gz")
   expect_true(file.exists(file))
   species <- read.csv(file)
-  expect_more_than(NROW(species), 500)
+  expect_gt(NROW(species), 500)
   file.remove(file)
   expect_false(file.exists(file))
   options(marinespeed_datadir=NULL)
@@ -110,8 +114,8 @@ test_that("get_folds works", {
   check_folds <- function(folds) {
     expect_equal(NCOL(folds$background),6)
     expect_equal(NCOL(folds$species),6)
-    expect_more_than(NROW(folds$background),1000)
-    expect_more_than(NROW(folds$species),10000)
+    expect_gt(NROW(folds$background),1000)
+    expect_gt(NROW(folds$species),10000)
   }
   check_folds(get_folds("disc"))
   check_folds(get_folds("random"))
@@ -121,8 +125,8 @@ test_that("get_folds works", {
 test_that("get_background works", {
   setup_load()
   check_background <- function(bg) {
-    expect_more_than(NCOL(bg), 50)
-    expect_more_than(NROW(bg), 1000)
+    expect_gt(NCOL(bg), 50)
+    expect_gt(NROW(bg), 1000)
   }
   check_background(get_background("random"))
   check_background(get_background("random"))

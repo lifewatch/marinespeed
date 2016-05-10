@@ -103,14 +103,14 @@ test_that("kfold_species_background with different settings works", {
   folds4 <- kfold_occurrence_background(species, background, pwd_sample = FALSE)
   expect_false(identical(folds1, folds4))
   validate_folds(folds4)
-  expect_less_than(sum(complete.cases(folds4$background)), NROW(folds4$background))
+  expect_lt(sum(complete.cases(folds4$background)), NROW(folds4$background))
 
   ## occurrence_fold_type = "random"
   set.seed(42)
   folds5 <- kfold_occurrence_background(species, background, occurrence_fold_type = "random")
   expect_false(identical(folds1, folds5))
   validate_folds(folds5)
-  expect_less_than(sum(complete.cases(folds5$background)), NROW(folds5$background)) ## background points filtered out
+  expect_lt(sum(complete.cases(folds5$background)), NROW(folds5$background)) ## background points filtered out
 
   ## background_buffer = 0
   set.seed(42)
@@ -136,7 +136,7 @@ test_that("kfold_species_background with different settings works", {
   ## random, pwd_sample = F, background_buffer = 1000*1000
   set.seed(42)
   folds9 <- kfold_occurrence_background(species, background, occurrence_fold_type = "random", background_buffer = 1000*1000, pwd_sample = FALSE)
-  expect_less_than(sum(complete.cases(folds9$background)), sum(complete.cases(folds5$background)))
+  expect_lt(sum(complete.cases(folds9$background)), sum(complete.cases(folds5$background)))
   expect_equal(sum(folds9$background[,2:6]==FALSE, na.rm = TRUE), 200) ## expect 200 background test points when pwd_sample = FALSE
   validate_folds(folds9)
 

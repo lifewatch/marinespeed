@@ -141,8 +141,8 @@ get_fold_data <- function(species, fold_type, k) {
     occ_test <- kfold_data(species, occurrences, folds$species, fold, training = FALSE)
     bg_train <- kfold_data(species, bg, folds$background, fold, training = TRUE)
     bg_test <- kfold_data(species, bg, folds$background, fold, training = FALSE)
-    bg_train$species <- "background"
-    bg_test$species <- "background"
+    bg_train$species <- rep("background", nrow(bg_train))
+    bg_test$species <- rep("background", nrow(bg_test))
     klist[[fold]] <- list(occurrence_training=occ_train, occurrence_test=occ_test,
                         background_training=bg_train, background_test=bg_test)
   }
