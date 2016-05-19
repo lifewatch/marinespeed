@@ -130,8 +130,8 @@ lapply_kfold_species <- function(fun, ..., species = NULL, fold_type = "disc", k
     klist <- list(NULL, NULL, NULL, NULL, NULL)
     for (fold in k) {
       occ_train <- kfold_data(speciesname, occurrences, folds$species, fold, training = TRUE)
-      occ_test <- kfold_data(speciesname, occurrences, folds$species, fold, training = TRUE)
-      bg_train <- kfold_data(speciesname, bg, folds$background, fold, training = FALSE)
+      occ_test <- kfold_data(speciesname, occurrences, folds$species, fold, training = FALSE)
+      bg_train <- kfold_data(speciesname, bg, folds$background, fold, training = TRUE)
       bg_test <- kfold_data(speciesname, bg, folds$background, fold, training = FALSE)
       bg_train$species <- rep("background", nrow(bg_train))
       bg_test$species <- rep("background", nrow(bg_test))

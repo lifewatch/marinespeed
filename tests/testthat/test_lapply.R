@@ -37,8 +37,10 @@ test_that("lapply_kfold_species works", {
     expect_true(fold %in% folds_check)
     expect_gt(nrow(data$occurrence_training), 0)
     expect_gt(nrow(data$occurrence_test), 0)
+    expect_gt(nrow(data$occurrence_training), nrow(data$occurrence_test))
     expect_gt(nrow(data$background_training), 0)
     expect_gt(nrow(data$background_test), 0)
+    expect_gt(nrow(data$background_training), nrow(data$background_test))
     data$occurrence_training[,"longitude"]
   }
 
