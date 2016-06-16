@@ -33,6 +33,17 @@ test_that("list species", {
   expect_equal(colnames(species), c("species", "aphia_id"))
 })
 
+test_that("species traits", {
+  setup_load()
+
+  traits <- species_traits()
+  species <- list_species()[,"species"]
+  expect_gt(NROW(traits), 500)
+  expect_gt(NCOL(traits), 20)
+  expect_equal(colnames(traits[,1:5]), c("species", "aphia_id", "eol_id", "kingdom", "phylum"))
+})
+
+
 test_that("get occurrences works", {
   setup_load()
 

@@ -10,8 +10,7 @@
 #'   can be set with \code{options(marinespeed_datadir = ".")}.
 #'
 #' @seealso \code{\link{lapply_kfold_species}} \code{\link{lapply_species}}
-#'   \code{\link{get_fold_data}} \code{\link{get_occurrences}}
-#'
+#'   \code{\link{get_fold_data}} \code{\link{get_occurrences}} \code{\link{species_traits}}
 #' @examples
 #' species <- list_species()
 #' species$species
@@ -19,6 +18,25 @@
 #' @export
 list_species <- function() {
   read.csv(get_file("species.csv.gz"))
+}
+
+#' Species traits
+#'
+#' \code{species_traits} returns a dataframe with species traits information.
+#'
+#' @usage species_traits(species = NULL)
+#'
+#' @details Traits information includes information about the taxonomy from the World Register of
+#'   Marine Species and habitat traits from the Encyclopedia of Life.
+#'
+#' @seealso \code{\link{list_species}}
+#'
+#' @examples
+#' traits <- species_traits()
+#' traits$kingdom
+#' @export
+species_traits <- function() {
+  read.csv(get_file("traits.csv.gz"))
 }
 
 #' Get occurrence records
