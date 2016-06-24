@@ -4,7 +4,7 @@
 \alias{species_traits}
 \title{Species traits}
 \usage{
-species_traits(species = NULL)
+species_traits()
 }
 \description{
 \code{species_traits} returns a dataframe with species traits information.

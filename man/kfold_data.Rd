@@ -43,11 +43,15 @@ folds <- kfold_occurrence_background(occ_data, bg_data)
 # folds <- load_folds("random")
 
 ## get training and test data for the first fold
-occ_training <- kfold_data("Abalistes stellatus", occ_data, folds$occurrence, fold = 1, training = TRUE)
-occ_test <- kfold_data("Abalistes stellatus", occ_data, folds$occurrence, fold = 1, training = FALSE)
+occ_training <- kfold_data("Abalistes stellatus", occ_data, folds$occurrence,
+                           fold = 1, training = TRUE)
+occ_test <- kfold_data("Abalistes stellatus", occ_data, folds$occurrence,
+                       fold = 1, training = FALSE)
 
-bg_training <- kfold_data("Abalistes stellatus", bg_data, folds$background, fold = 1, training = TRUE)
-bg_test <- kfold_data("Abalistes stellatus", bg_data, folds$background, fold = 1, training = FALSE)
+bg_training <- kfold_data("Abalistes stellatus", bg_data, folds$background,
+                          fold = 1, training = TRUE)
+bg_test <- kfold_data("Abalistes stellatus", bg_data, folds$background,
+                      fold = 1, training = FALSE)
 
 }
 

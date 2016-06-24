@@ -30,7 +30,7 @@ dismo_distGeo <- function(x, y) {
   m <- nrow(y)
   dm <- matrix(ncol = m, nrow = n)
   for (i in 1:n) {
-    dm[i, ] <- distHaversine(x[i, , drop = FALSE], y)
+    dm[i, ] <- dismo_distHaversine(x[i, , drop = FALSE], y)
   }
   return(dm)
 }

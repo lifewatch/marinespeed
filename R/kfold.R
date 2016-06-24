@@ -32,11 +32,15 @@
 #' # folds <- load_folds("random")
 #'
 #' ## get training and test data for the first fold
-#' occ_training <- kfold_data("Abalistes stellatus", occ_data, folds$occurrence, fold = 1, training = TRUE)
-#' occ_test <- kfold_data("Abalistes stellatus", occ_data, folds$occurrence, fold = 1, training = FALSE)
+#' occ_training <- kfold_data("Abalistes stellatus", occ_data, folds$occurrence,
+#'                            fold = 1, training = TRUE)
+#' occ_test <- kfold_data("Abalistes stellatus", occ_data, folds$occurrence,
+#'                        fold = 1, training = FALSE)
 #'
-#' bg_training <- kfold_data("Abalistes stellatus", bg_data, folds$background, fold = 1, training = TRUE)
-#' bg_test <- kfold_data("Abalistes stellatus", bg_data, folds$background, fold = 1, training = FALSE)
+#' bg_training <- kfold_data("Abalistes stellatus", bg_data, folds$background,
+#'                           fold = 1, training = TRUE)
+#' bg_test <- kfold_data("Abalistes stellatus", bg_data, folds$background,
+#'                       fold = 1, training = FALSE)
 #'
 #' @export
 kfold_data <- function(species_name, data, folds, fold, training) {
@@ -259,10 +263,10 @@ kfold_disc <- function(data, k = 5, lonlat = TRUE) {
 #'
 #' @export
 plot_folds <- function(data, folds) {
-  plot(data, pch=".")
+  graphics::plot(data, pch=".")
   k <- max(folds)
-  cols <- rainbow(k)
+  cols <- grDevices::rainbow(k)
   for(i in 1:k) {
-    text(data[folds==i,], labels = i, pch=20, col=cols[i])
+    graphics::text(data[folds==i,], labels = i, pch=20, col=cols[i])
   }
 }

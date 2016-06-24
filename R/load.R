@@ -24,7 +24,7 @@ list_species <- function() {
 #'
 #' \code{species_traits} returns a dataframe with species traits information.
 #'
-#' @usage species_traits(species = NULL)
+#' @usage species_traits()
 #'
 #' @details Traits information includes information about the taxonomy from the World Register of
 #'   Marine Species and habitat traits from the Encyclopedia of Life.
