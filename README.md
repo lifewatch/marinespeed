@@ -3,7 +3,7 @@
 [![Coverage Status](http://codecov.io/github/samuelbosch/marinespeed/coverage.svg?branch=master)](http://codecov.io/github/samuelbosch/marinespeed?branch=master)
 
 # MarineSPEED
-R code for downloading and working with the Marine SPEcies and Environmnetal Data ([MarineSPEED.org](http://MarineSPEED.org)) dataset
+R code for downloading and working with the Marine SPEcies and Environmental Data ([MarineSPEED.org](http://MarineSPEED.org)) benchmark dataset.
 
 Installation:
 
