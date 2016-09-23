@@ -118,12 +118,20 @@ kfold_data <- function(species_name, data, folds, fold, training) {
 #' @examples
 #' set.seed(42)
 #' occurrence_data <- data.frame(species = rep("Abalistes stellatus", 50),
-#'                               longitude = runif(50, -180, 180), latitude = runif(50, -90, 90))
-#' background_data <- data.frame(species = rep("background", 10000),
-#'                               longitude = runif(1000, -180, 180), latitude = runif(1000, -90, 90))
-#' disc_folds <- kfold_occurrence_background(occurrence_data, background_data, "disc")
-#' random_folds <- kfold_occurrence_background(occurrence_data, background_data, "random",
-#'                                             pwd_sample = FALSE, background_buffer = 0)
+#'                               longitude = runif(50, -180, 180),
+#'                               latitude = runif(50, -90, 90))
+#'
+#' # NOTE this NOT how you would want to create random background point
+#' # Use special functions for this like dismo::randomPoints, especially for
+#' # lonlat data
+#' background_data <- data.frame(species = rep("background", 500),
+#'                               longitude = runif(500, -180, 180),
+#'                               latitude = runif(500, -90, 90))
+#' disc_folds <- kfold_occurrence_background(occurrence_data, background_data,
+#'                                           "disc")
+#' random_folds <- kfold_occurrence_background(occurrence_data, background_data,
+#'                                             "random", pwd_sample = FALSE,
+#'                                             background_buffer = 0)
 #'
 #' @export
 kfold_occurrence_background <- function(occurrence_data, background_data, occurrence_fold_type = "disc", k = 5, pwd_sample = TRUE, lonlat = TRUE, background_buffer = 200*1000) {
@@ -133,11 +141,17 @@ kfold_occurrence_background <- function(occurrence_data, background_data, occurr
   # 4) make sure training and testing background are different
   # 5) set NA background points that are not in the training and not in the testing set
   if(!pwd_sample) {
+    if(!requireNamespace("dismo")) {
+      stop("dismo is required when pwd_sample is TRUE in kfold_occurrence_background")
+    }
     background_partitions <- dismo::kfold(background_data, k)
   }
   if(occurrence_fold_type == "disc") {
     occurrence_partitions <- kfold_disc(occurrence_data[,2:3], k, lonlat)
   } else if (occurrence_fold_type == "random") {
+    if(!requireNamespace("dismo")) {
+      stop("dismo is required when occurrence_fold_type='random' in kfold_occurrence_background")
+    }
     occurrence_partitions <- dismo::kfold(occurrence_data, k)
   } else {
     stop("Unknown fold type")
@@ -152,7 +166,7 @@ kfold_occurrence_background <- function(occurrence_data, background_data, occurr
     occurrence_training <- occurrence_data[occurrence_partitions != ki, 2:3]
 
     if(pwd_sample) {
-      test_sample <- dismo_pwdSample(occurrence_test, background_data[,2:3], occurrence_training, n=5) ## try to get 5 background points for each testing presence point, you'll get less than that
+      test_sample <- pwd_sample(occurrence_test, background_data[,2:3], occurrence_training, n=5) ## try to get 5 background points for each testing presence point, you'll get less than that
     } else {
       test_sample <- which(background_partitions==ki) ## use randomly generated partitions
     }
@@ -210,7 +224,7 @@ kfold_disc <- function(data, k = 5, lonlat = TRUE) {
   if(is.na(k) || k < 1) {
     stop("k should at least be 1")
   } else if(k > (NROW(data)/2)) {
-    stop("k should be less then or equal to half the number of rows in data")
+    stop("k should be less than or equal to half the number of rows in data")
   }
   d <- as.data.frame(data[,1:2])
   d[,3] <- 1:NROW(d)

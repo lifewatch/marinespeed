@@ -22,6 +22,7 @@ species$aphia_id
 }
 \seealso{
 \code{\link{lapply_kfold_species}} \code{\link{lapply_species}}
-  \code{\link{get_fold_data}} \code{\link{get_occurrences}} \code{\link{species_traits}}
+  \code{\link{get_fold_data}} \code{\link{get_occurrences}}
+  \code{\link{species_traits}}
 }
 

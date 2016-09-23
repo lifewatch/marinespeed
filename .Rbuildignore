@@ -1,4 +1,8 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-.travis.yml
-LICENSE.md
+^.travis.yml
+^LICENSE.md
+^cran-comments.md
+^NEWS\.md$
+^\.git$
+^vignettes/.*\.jpeg$

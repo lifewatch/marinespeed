@@ -64,12 +64,20 @@ Note that which and how many background points get selected in each
 \examples{
 set.seed(42)
 occurrence_data <- data.frame(species = rep("Abalistes stellatus", 50),
-                              longitude = runif(50, -180, 180), latitude = runif(50, -90, 90))
-background_data <- data.frame(species = rep("background", 10000),
-                              longitude = runif(1000, -180, 180), latitude = runif(1000, -90, 90))
-disc_folds <- kfold_occurrence_background(occurrence_data, background_data, "disc")
-random_folds <- kfold_occurrence_background(occurrence_data, background_data, "random",
-                                            pwd_sample = FALSE, background_buffer = 0)
+                              longitude = runif(50, -180, 180),
+                              latitude = runif(50, -90, 90))
+
+# NOTE this NOT how you would want to create random background point
+# Use special functions for this like dismo::randomPoints, especially for
+# lonlat data
+background_data <- data.frame(species = rep("background", 500),
+                              longitude = runif(500, -180, 180),
+                              latitude = runif(500, -90, 90))
+disc_folds <- kfold_occurrence_background(occurrence_data, background_data,
+                                          "disc")
+random_folds <- kfold_occurrence_background(occurrence_data, background_data,
+                                            "random", pwd_sample = FALSE,
+                                            background_buffer = 0)
 
 }
 \references{

@@ -10,7 +10,8 @@
 #'   can be set with \code{options(marinespeed_datadir = ".")}.
 #'
 #' @seealso \code{\link{lapply_kfold_species}} \code{\link{lapply_species}}
-#'   \code{\link{get_fold_data}} \code{\link{get_occurrences}} \code{\link{species_traits}}
+#'   \code{\link{get_fold_data}} \code{\link{get_occurrences}}
+#'   \code{\link{species_traits}}
 #' @examples
 #' species <- list_species()
 #' species$species
@@ -26,8 +27,9 @@ list_species <- function() {
 #'
 #' @usage species_traits()
 #'
-#' @details Traits information includes information about the taxonomy from the World Register of
-#'   Marine Species and habitat traits from the Encyclopedia of Life.
+#' @details Traits information includes information about the taxonomy from the
+#'   World Register of Marine Species (WoRMS) and habitat traits from the
+#'   Encyclopedia of Life (EOL).
 #'
 #' @seealso \code{\link{list_species}}
 #'
@@ -208,7 +210,7 @@ get_file <- function(filename) {
   outfile <- file.path(datadir, filename)
   outfile_nozip <- file.path(datadir,sub("[.]zip$", "", filename))
   if(!file.exists(outfile) && !dir.exists(outfile_nozip)) {
-    root <- paste0("http://www.phycology.ugent.be/research/marinespeed/", get_version(), "/")
+    root <- paste0("http://marinespeed.samuelbosch.com/", get_version(), "/")
     tryCatch({
       download.file(paste0(root, filename), outfile)
     }, error = function(e) { file.remove(outfile)})

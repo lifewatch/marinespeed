@@ -1,0 +1,123 @@
+---
+title: "MarineSPEED quickstart guide"
+author: "Samuel Bosch"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{MarineSPEED quickstart guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+The goal of MarineSPEED is to provide a benchmark data set for presence-only 
+species distribution modeling (SDM) in order to facilitate reproducible and 
+comparable SDM research. It contains species occurrences (coordinates) from a 
+wide diversity of marine species and associated environmental data from 
+Bio-ORACLE and MARSPEC. Some additional information about MarineSPEED can be 
+found in the R Shiny viewer at <http://marinespeed.org>.
+
+## Èxploring the data
+
+Three functions help with exploring
+
+```{r}
+library(marinespeed)
+
+# list all species
+species <- list_species()
+```
+
+The first 5 species and there aphia_id (WoRMS species id) are:
+
+```{r, echo = FALSE}
+knitr::kable(species[1:5,], row.names = FALSE)
+```
+
+The traits data consists of species identifiers, taxonomic information from the 
+World Register of Marine Species (WoRMS), a visual assessment score for the 
+amount of sampling bias and the most common traits from the Encyclopedia of Life.
+
+```{r}
+# all species traits
+traits <- species_traits()
+colnames(traits)
+```
+
+## Looping over all species data
+
+To loop over the occurrence data of all species you have to call the 
+*lapply_species* function. For instance if you wanted to count the total number 
+of records in MarineSPEED you'd need the following code. As you can see the 
+function passed to *lapply_species* expects to parameters, one for the 
+species name and one for the actual occurrences.
+
+```{r, cache = TRUE, eval=FALSE}
+get_occ_count <- function(speciesname, occ) {
+  nrow(occ)
+}
+record_counts <- lapply_species(get_occ_count)
+sum(unlist(record_counts))
+```
+```{r, echo=FALSE}
+868151
+```
+
+
+## Cross-validation
+
+To enable the usage of the same cross-validation k-fold datasets I splitted
+species occurrence data upfront in 5 folds in 3 different ways:
+
+- disc: disc partitioning of occurrences with pairwise distance sampled and 
+buffer filtered random background points
+- random: random partitioning of occurrences and random background points
+- targetgroup: same way of partitioning as the random folds but instead of
+random background points, a random subset of all occurrences points was used
+creating a targetgroup background points set which has the same sampling bias
+as the entire dataset.
+
+Below code plots the training (blue) and test (red) occurrences for the first 
+two disc folds of the first two species.
+
+```{r, echo=FALSE}
+
+## plot first 2 disc folds for the first 2 species (blue=trainig, red=test)
+plot_occurrences <- function(speciesname, data, fold) {
+  fname <- paste0(sub(" ", "_", speciesname), fold, ".jpeg")
+  jpeg(filename = fname)
+  title <- paste0(speciesname, " (fold = ", fold, ")")  
+  plot(data$occurrence_train[,c("longitude", "latitude")], pch=20, col="blue",
+       main = title)
+  points(data$occurrence_test[,c("longitude", "latitude")], pch=20, col="red")
+ 
+  dev.off()
+}
+
+x <- lapply_kfold_species(plot_occurrences, species=species[1:2,],
+                     fold_type = "disc", k = 1:2)
+```
+
+```{r, eval=FALSE, echo=TRUE}
+## plot first 2 disc folds for the first 2 species (blue=trainig, red=test)
+plot_occurrences <- function(speciesname, data, fold) {
+  title <- paste0(speciesname, " (fold = ", fold, ")")
+  plot(data$occurrence_train[,c("longitude", "latitude")], pch=20, col="blue",
+       main = title)
+  points(data$occurrence_test[,c("longitude", "latitude")], pch=20, col="red")
+}
+
+lapply_kfold_species(plot_occurrences, species=species[1:2,],
+                     fold_type = "disc", k = 1:2)
+```
+
+![](Laternula_elliptica1.jpeg)
+![](Laternula_elliptica2.jpeg)
+![](Pseudosagitta_gazellae1.jpeg)
+![](Pseudosagitta_gazellae2.jpeg)
+
+## Lower level functions
+
+- *get_occurrences*: get all occurrences for some or all species
+- *get_fold_data*: get training and test folds for occurrences and background
+for a species
+- *kfold_occurrence_background*: to create k folds for other species records

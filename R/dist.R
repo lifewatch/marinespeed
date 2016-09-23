@@ -7,12 +7,12 @@ lonlat_xyz <- function(data, lonlat_cols) {
   return(r)
 }
 
-dist_plane <- function(a, b) {
+dist_plane_point_matrix <- function(a, b) {
   ## Euclidean distance from point to data.frame/matrix of points
   sqrt((a[, 1] - b[, 1])^2 + (a[, 2] - b[, 2])^2)
 }
 
-dismo_distHaversine <- function(p1, p2) {
+dist_haversine <- function(p1, p2) {
   r <- 6378137
   toRad <- pi/180
   p1 <- p1 * toRad
@@ -25,38 +25,38 @@ dismo_distHaversine <- function(p1, p2) {
   dist <- 2 * atan2(sqrt(a), sqrt(abs(1 - a))) * r
   as.vector(dist)
 }
-dismo_distGeo <- function(x, y) {
+dist_geo <- function(x, y) {
   n <- nrow(x)
   m <- nrow(y)
   dm <- matrix(ncol = m, nrow = n)
   for (i in 1:n) {
-    dm[i, ] <- dismo_distHaversine(x[i, , drop = FALSE], y)
+    dm[i, ] <- dist_haversine(x[i, , drop = FALSE], y)
   }
   return(dm)
 }
-dismo_distPlane <- function(x, y) {
+dist_plane <- function(x, y) {
   n = nrow(x)
   m = nrow(y)
   dm = matrix(ncol = m, nrow = n)
   for (i in 1:n) {
-    dm[i, ] = dist_plane(x[i, , drop = FALSE], y)
+    dm[i, ] = dist_plane_point_matrix(x[i, , drop = FALSE], y)
   }
   return(dm)
 }
 
 #' @importFrom geosphere distGeo
-get_distfun <- function(lonlat, dismo = FALSE) {
+get_distfun <- function(lonlat, dismo_like = FALSE) {
   if(lonlat) {
-    if(dismo) {
-      dismo_distGeo
+    if(dismo_like) {
+      dist_geo
     } else {
       geosphere::distGeo
     }
   } else {
-    if(dismo) {
-      dismo_distPlane
-    } else {
+    if(dismo_like) {
       dist_plane
+    } else {
+      dist_plane_point_matrix
     }
   }
 }
@@ -72,7 +72,7 @@ mindist <- function(distfun, a, b, lonlat) {
       nn <- FNN::get.knnx(b, a, k=1)
       nn$nn.dist
     }
-  } else {
+  } else if(requireNamespace("dismo")) {
     warning("package FNN not found, using a slower approach")
     partition_count <- (1 %/% (1000 / NROW(b))) + 1
     parts <- dismo::kfold(x=b, k=partition_count)
@@ -82,5 +82,7 @@ mindist <- function(distfun, a, b, lonlat) {
       r <- cbind(r, mind)
     }
     apply(r, 1, min)
+  } else {
+    stop("Either FNN (preferably) or dimo should be installed for this to work")
   }
 }

@@ -10,8 +10,9 @@ species_traits()
 \code{species_traits} returns a dataframe with species traits information.
 }
 \details{
-Traits information includes information about the taxonomy from the World Register of
-  Marine Species and habitat traits from the Encyclopedia of Life.
+Traits information includes information about the taxonomy from the
+  World Register of Marine Species (WoRMS) and habitat traits from the
+  Encyclopedia of Life (EOL).
 }
 \examples{
 traits <- species_traits()

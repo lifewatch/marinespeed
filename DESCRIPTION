@@ -2,15 +2,15 @@ Package: marinespeed
 Type: Package
 Title: Benchmark data sets and functions for marine species distribution
     modeling
-Version: 0.0.0.9013
-Date: 2016-04-01
+Version: 0.1.0
+Date: 2016-09-24
+Depends:
+    R (>= 3.2.5)
 Imports:
     stats,
     utils,
     graphics,
-    grDevices
-Depends:
-    R (>= 3.2.0),
+    grDevices,
     geosphere,
     sp
 Authors@R: person("Samuel", "Bosch", email = "mail@samuelbosch.com", role = c("aut", "cre"))
@@ -22,5 +22,8 @@ Suggests:
     biomod2,
     dismo,
     FNN,
-    testthat
+    testthat,
+    knitr,
+    rmarkdown
 RoxygenNote: 5.0.1
+VignetteBuilder: knitr
