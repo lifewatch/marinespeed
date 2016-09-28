@@ -122,15 +122,37 @@ test_that("get_file works", {
 
 test_that("get_folds works", {
   setup_load()
-  check_folds <- function(folds) {
-    expect_equal(NCOL(folds$background),6)
-    expect_equal(NCOL(folds$species),6)
+  check_classic_folds <- function(fold_name, k=5) {
+    skip_on_cran()
+    folds <- get_folds(fold_name)
+    expect_equal(NCOL(folds$background),k+1)
+    expect_equal(NCOL(folds$species),k+1)
     expect_gt(NROW(folds$background),1000)
     expect_gt(NROW(folds$species),10000)
   }
-  check_folds(get_folds("disc"))
-  check_folds(get_folds("random"))
-  check_folds(get_folds("targetgroup"))
+  options(marinespeed_folds_extension = ".csv.gz")
+  check_classic_folds("disc")
+  check_classic_folds("random")
+  check_classic_folds("targetgroup")
+  check_classic_folds("grid_4", k = 4)
+  check_classic_folds("grid_9", k = 9)
+
+  check_bit_folds <- function(folds, k=5) {
+    expect_equal(class(folds$species), "marinespeed_folds")
+    expect_equal(class(folds$background), "marinespeed_folds")
+    expect_gt(length(folds$species$species), 500)
+    expect_gt(length(folds$background$species), 0)
+    expect_true(all(paste0("k", 1:k) %in% names(folds$background)))
+    expect_true(all(paste0("k", 1:k) %in% names(folds$species)))
+    expect_true(bit::is.bit(folds$species$k1))
+    expect_true(bit::is.bit(folds$background$k1))
+  }
+  options(marinespeed_folds_extension = "_bit.rds")
+  check_bit_folds(get_folds("disc"))
+  check_bit_folds(get_folds("random"))
+  check_bit_folds(get_folds("targetgroup"))
+  check_bit_folds(get_folds("grid_4"), k = 4)
+  check_bit_folds(get_folds("grid_9"), k = 9)
 })
 
 test_that("get_background works", {
@@ -140,5 +162,5 @@ test_that("get_background works", {
     expect_gt(NROW(bg), 1000)
   }
   check_background(get_background("random"))
-  check_background(get_background("random"))
+  check_background(get_background("targetgroup"))
 })

@@ -66,11 +66,14 @@ sum(unlist(record_counts))
 ## Cross-validation
 
 To enable the usage of the same cross-validation k-fold datasets I splitted
-species occurrence data upfront in 5 folds in 3 different ways:
+species occurrence data upfront in 5 folds (or 4 and 9 for grid) in 3 different ways:
 
 - disc: disc partitioning of occurrences with pairwise distance sampled and 
-buffer filtered random background points
-- random: random partitioning of occurrences and random background points
+buffer filtered random background points.
+- grid: partitioning of the data based on splitting the records along the x- and 
+y-axis in groups of records with equal numbers of records. Data was split in 4 
+(2 by 2) and 9 (3 by 3) folds.
+- random: random partitioning of occurrences and random background points.
 - targetgroup: same way of partitioning as the random folds but instead of
 random background points, a random subset of all occurrences points was used
 creating a targetgroup background points set which has the same sampling bias

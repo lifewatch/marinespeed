@@ -55,6 +55,13 @@ test_that("lapply_kfold_species works", {
   expect_false(is.null(results[[1]][[4]]))
   ## fold records should be different
   expect_gt(length(setdiff(results[[1]][[3]], results[[1]][[4]])), length(results[[1]][[4]]) / 6)
+
+  results <- lapply_kfold_species(validate_species, species_check=species_list[3:15], folds_check=3, k=3, species=species_list[3:15], fold_type="targetgroup")
+  expect_equal(length(results), 13)
+  results <- lapply_kfold_species(validate_species, species_check=species_list[3:15], folds_check=3, k=3, species=species_list[3:15], fold_type="grid_4")
+  expect_equal(length(results), 13)
+  results <- lapply_kfold_species(validate_species, species_check=species_list[3:15], folds_check=8, k=8, species=species_list[3:15], fold_type="grid_9")
+  expect_equal(length(results), 13)
 })
 
 

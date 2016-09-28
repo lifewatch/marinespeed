@@ -27,12 +27,14 @@ Example usage:
     ## plot first 2 folds for the first 10 species
     plot_occurrences <- function(speciesname, data, k) {
        title <- paste0(speciesname, " (fold = ", k, ")")
-       plot(data$occurrence_train[,c("longitude", "latitude")], pch=".", col="blue",
-            main = title)
-       points(data$occurrence_test[,c("longitude", "latitude")], pch=".", col="red")
+       plot(data$occurrence_train[,c("longitude", "latitude")], pch=".", 
+            col="blue", main = title)
+       points(data$occurrence_test[,c("longitude", "latitude")], pch=".", 
+              col="red")
     }
     
-    # plot training (blue) and test (red) occurrences of the first 2 folds for the first 10 species
+    # plot training (blue) and test (red) occurrences of the first 2 disc folds 
+    # for the first 10 species
     species <- list_species()
     lapply_kfold_species(plot_occurrences, species=species[1:10,],
                          fold_type = "disc", k = 1:2)

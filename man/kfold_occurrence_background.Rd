@@ -19,8 +19,9 @@ a dummy column followed by two columns representing the longitude and
 latitude (or x,y coordinates if \code{lonlat = FALSE}).}
 
 \item{occurrence_fold_type}{Character vector. How occurrence folds should be
-generated, currently \code{"disc"} (see \code{\link{kfold_disc}}) and
-\code{"random"} are supported.}
+generated, currently \code{"disc"} (see \code{\link{kfold_disc}}),
+\code{"grid"} (see \code{\link{kfold_grid}}) and \code{"random"} are
+supported.}
 
 \item{k}{Integer. The number of folds (partitions) that have to be created.
 By default 5 folds are created.}
@@ -67,7 +68,7 @@ occurrence_data <- data.frame(species = rep("Abalistes stellatus", 50),
                               longitude = runif(50, -180, 180),
                               latitude = runif(50, -90, 90))
 
-# NOTE this NOT how you would want to create random background point
+# REMARK: this NOT how you would want to create random background point
 # Use special functions for this like dismo::randomPoints, especially for
 # lonlat data
 background_data <- data.frame(species = rep("background", 500),

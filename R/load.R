@@ -18,7 +18,7 @@
 #' species$aphia_id
 #' @export
 list_species <- function() {
-  read.csv(get_file("species.csv.gz"))
+  csv2rds(get_file("species.csv.gz"))
 }
 
 #' Species traits
@@ -38,7 +38,7 @@ list_species <- function() {
 #' traits$kingdom
 #' @export
 species_traits <- function() {
-  read.csv(get_file("traits.csv.gz"))
+  csv2rds(get_file("traits.csv.gz"))
 }
 
 #' Get occurrence records
@@ -85,7 +85,7 @@ get_occurrences <- function(species = NULL, raw = FALSE) {
       warning("No occurrence files found for the provided species")
     }
   }
-  do.call("rbind", lapply(paths, function(p) { read.csv(p) }))
+  do.call("rbind", lapply(paths, function(p) { csv2rds(p) }))
 }
 
 #' Get fold data
@@ -109,6 +109,12 @@ get_occurrences <- function(species = NULL, raw = FALSE) {
 #'   to calling \code{\link{kfold_occurrence_background}} with
 #'   \code{occurrence_fold_type = "disc", k = 5, pwd_sample = TRUE,
 #'   background_buffer = 200*1000}
+#'
+#'   \code{"grid_4"} and \code{"grid_9"}: 4-fold and 9-fold grid partitioning of
+#'   occurrences with pairwise distance sampled and buffer filtered random
+#'   background points, equivalent to calling
+#'   \code{\link{kfold_occurrence_background}} with \code{occurrence_fold_type =
+#'   "grid", k = 4, pwd_sample = TRUE, background_buffer = 200*1000}
 #'
 #'   \code{"random"}: 5-fold random partitioning of occurrences and random
 #'   background points, equivalent to calling
@@ -142,8 +148,11 @@ get_fold_data <- function(species, fold_type, k) {
     ## otherwise might get into memory problems
     stop("get_fold_data expects only 1 species")
   }
-  if(min(k) < 1 || max(k) > 5) {
-    stop("k should be between 1 and 5")
+  max_k <- 5
+  max_k <- ifelse(fold_type == "grid_4", 4, max_k)
+  max_k <- ifelse(fold_type == "grid_9", 9, max_k)
+  if(min(k) < 1 || max(k) > max_k) {
+    stop(paste0("k should be between 1 and ", max_k))
   }
   species <- get_species_names(species)
   occurrences <- get_occurrences(species)
@@ -222,7 +231,6 @@ get_file <- function(filename) {
   normalizePath(outfile_nozip)
 }
 
-
 get_species_names <- function(species) {
   if(NCOL(species) == 2 && colnames(species) == c("species", "aphia_id")) {
     species <- species[,"species"]
@@ -233,7 +241,36 @@ get_species_names <- function(species) {
   as.character(species)
 }
 
+csv2rds <- function(file, extension = ".rds") {
+  rds_file <- sub("[.]csv[.]gz$", extension, file)
+  data <- NULL
+  if(file.exists(rds_file)) { ## cache as rds (faster)
+    data <- readRDS(rds_file)
+  }
+  if(extension == ".rds" && (is.null(data) || getOption("stringsAsFactors") != is.factor(data[1,1]))) {
+    data <- read.csv(file)
+    saveRDS(data, rds_file)
+  } else if (is.null(data) && grepl("cv_folds_bit[.]rds$", rds_file)) {
+    folds <- read.csv(file)
+    data <- structure(list(), class = "marinespeed_folds")
 
+    species <- folds[,1]
+    for(sp in unique(species)) {
+      w <- as.which(species == sp)
+      data[["species"]][[sp]] <- c(min(w), max(w))
+    }
+    for(ki in 2:ncol(folds)) {
+      if(any(is.na(folds[,ki]))) {
+        data[[paste0(colnames(folds)[ki], "_NOTNA")]] <- !as.bit(is.na(folds[,ki]))
+      }
+      data[[colnames(folds)[ki]]] <- as.bit(folds[,ki])
+    }
+    saveRDS(data, rds_file)
+  } else if(is.null(data)) {
+    stop("unsupported")
+  }
+  data
+}
 
 #' Get folds
 #'
@@ -251,6 +288,12 @@ get_species_names <- function(species) {
 #'   to calling \code{\link{kfold_occurrence_background}} with
 #'   \code{occurrence_fold_type = "disc", k = 5, pwd_sample = TRUE,
 #'   background_buffer = 200*1000}
+#'
+#'   \code{"grid_4"} and \code{"grid_9"}: 4-fold and 9-fold grid partitioning of
+#'   occurrences with pairwise distance sampled and buffer filtered random
+#'   background points, equivalent to calling
+#'   \code{\link{kfold_occurrence_background}} with \code{occurrence_fold_type =
+#'   "grid", k = 4, pwd_sample = TRUE, background_buffer = 200*1000}
 #'
 #'   \code{"random"}: 5-fold random partitioning of occurrences and random
 #'   background points, equivalent to calling
@@ -286,32 +329,34 @@ get_species_names <- function(species) {
 get_folds <- function(type = "disc") {
   type <- as.character(type)
   if(type == "disc") {
-    bg <- "pseudodisc_background_5cv_folds.csv.gz"
-    species <- "pseudodisc_species_5cv_folds.csv.gz"
+    bg <- "pseudodisc_background_5cv_folds"
+    species <- "pseudodisc_species_5cv_folds"
+  } else if(type == "grid_4") {
+    bg <- "grid_background_4cv_folds"
+    species <- "grid_species_4cv_folds"
+  } else if(type == "grid_9") {
+    bg <- "grid_background_9cv_folds"
+    species <- "grid_species_9cv_folds"
   } else if(type == "random") {
-    bg <- "random_background_5cv_folds.csv.gz"
-    species <- "random_species_5cv_folds.csv.gz"
+    bg <- "random_background_5cv_folds"
+    species <- "random_species_5cv_folds"
   } else if(type == "targetgroup") {
-    bg <- "targetgroup_background_5cv_folds.csv.gz"
-    species <- "random_species_5cv_folds.csv.gz"
+    bg <- "targetgroup_background_5cv_folds"
+    species <- "random_species_5cv_folds"
   } else {
     stop("fold_type not supported")
   }
-
-  rdscache <- function(file) {
-    rds_file <- sub("[.]csv[.]gz$", ".rds", file)
-    data <- NULL
-    if(file.exists(rds_file)) { ## cache as rds (faster)
-      data <- readRDS(rds_file)
-    }
-    if(is.null(data) || getOption("stringsAsFactors") != is.factor(data[1,1])) {
-      data <- read.csv(file)
-      saveRDS(data, rds_file)
-    }
-    data
+  extension <- getOption("marinespeed_folds_extension")
+  extension <- ifelse(is.null(extension), "_bit.rds", extension)
+  bg <- get_file(paste0(bg, extension))
+  species <- get_file(paste0(species, extension))
+  if(extension == ".csv.gz") {
+    bg_folds <- csv2rds(bg)
+    species_folds <- csv2rds(bg)
+  } else {
+    bg_folds <- readRDS(bg)
+    species_folds <- readRDS(species)
   }
-  bg_folds <- rdscache(get_file(bg))
-  species_folds <- rdscache(get_file(species))
 
   list(background = bg_folds, species = species_folds)
 }

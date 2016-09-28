@@ -15,7 +15,7 @@ lonlat_data <- function(species=NULL, nrow=50, seed=42, stringsAsFactors = TRUE)
 }
 
 fold_lengths <- function(folds, k=5) {
-  sapply(1:5, function(k) sum(folds==k))
+  sapply(1:k, function(k) sum(folds==k))
 }
 
 test_that("kfold disc returns a vector of valid folds", {
@@ -48,6 +48,36 @@ test_that("kfold disc works with lonlat=FALSE works", {
   lengths <- fold_lengths(folds, k=5)
   expect_equal(sum(lengths), 50)
   expect_equal(max(lengths) - min(lengths), 0)
+})
+
+test_that("kfold_grid returns valid folds", {
+  d <- lonlat_data(nrow=40)
+  set.seed(42)
+  folds <- kfold_grid(d, k=4, lonlat = TRUE)
+  lengths <- fold_lengths(folds, k=4)
+  expect_equal(sum(lengths), 40)
+  expect_equal(max(lengths) - min(lengths), 0)
+
+  d <- lonlat_data(nrow=43)
+  set.seed(42)
+  folds <- kfold_grid(d, k=4, lonlat = TRUE)
+  lengths <- fold_lengths(folds, k=4)
+  expect_equal(sum(lengths), 43)
+  expect_equal(max(lengths) - min(lengths), 1)
+
+  d <- lonlat_data(nrow=45)
+  set.seed(42)
+  folds <- kfold_grid(d, k=9, lonlat = TRUE)
+  lengths <- fold_lengths(folds, k=9)
+  expect_equal(sum(lengths), 45)
+  expect_equal(max(lengths) - min(lengths), 0)
+
+  d <- lonlat_data(nrow=44)
+  set.seed(42)
+  folds <- kfold_grid(d, k=9, lonlat = TRUE)
+  lengths <- fold_lengths(folds, k=9)
+  expect_equal(sum(lengths), 44)
+  expect_equal(max(lengths) - min(lengths), 1)
 })
 
 validate_folds <- function(folds) {
@@ -154,10 +184,10 @@ test_that("kfold_species_background with different settings works", {
   validate_folds(folds10)
 })
 
-plot_folds <- function(d, folds) {
+plot_folds <- function(d, folds, k=5) {
   plot(d, pch=".")
-  cols <- rainbow(5)
-  for(i in 1:5) {
+  cols <- rainbow(k)
+  for(i in 1:k) {
     text(d[folds==i,], labels = i, pch=20, col=cols[i])
   }
 }

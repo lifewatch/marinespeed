@@ -49,6 +49,12 @@ The parameters passed to \code{fun} are \code{speciesname},
   \code{occurrence_fold_type = "disc", k = 5, pwd_sample = TRUE,
   background_buffer = 200*1000}
 
+  \code{"grid_4"} and \code{"grid_9"}: 4-fold and 9-fold grid partitioning of
+  occurrences with pairwise distance sampled and buffer filtered random
+  background points, equivalent to calling
+  \code{\link{kfold_occurrence_background}} with \code{occurrence_fold_type =
+  "grid", k = 4, pwd_sample = TRUE, background_buffer = 200*1000}
+
   \code{"random"}: 5-fold random partitioning of occurrences and random
   background points, equivalent to calling
   \code{\link{kfold_occurrence_background}} with \code{occurrence_fold_type =

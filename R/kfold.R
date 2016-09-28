@@ -48,12 +48,28 @@ kfold_data <- function(species_name, data, folds, fold, training) {
     stop("fold should be of length 1")
   }
   kcol <- paste0("k",fold)
-  if(!all(kcol %in% colnames(folds))) {
+  if(!all(kcol %in% names(folds))) {
     stop("fold not found in folds")
   }
-  filter <- c(as.character(species_name), "background")
-  f <- folds[as.character(folds$species) %in% filter, kcol] == training
-  d <- data[f & !is.na(f),] ## handle NA's (from e.g. pseudo-disc background)
+  if(class(folds) == "marinespeed_folds"){
+    species_min_max <- folds[["species"]][[species_name]]
+    if(is.null(species_min_max)) {
+      species_min_max <- folds[["species"]][["background"]]
+    }
+    to_select <- folds[[kcol]][seq.int(species_min_max[1], species_min_max[2])]
+    if(!training) {
+      to_select <- !to_select
+    }
+    if(paste0(kcol, "_NOTNA") %in% names(folds)) {
+      notna <- folds[[paste0(kcol, "_NOTNA")]][seq.int(species_min_max[1], species_min_max[2])]
+      to_select <- to_select & notna
+    }
+    d <- data[bit::as.bitwhich(to_select),]
+  } else {
+    filter <- c(as.character(species_name), "background")
+    f <- folds[as.character(folds$species) %in% filter, kcol] == training
+    d <- data[f & !is.na(f),] ## handle NA's (from e.g. pseudo-disc background)
+  }
   d
 }
 
@@ -77,8 +93,9 @@ kfold_data <- function(species_name, data, folds, fold, training) {
 #'   a dummy column followed by two columns representing the longitude and
 #'   latitude (or x,y coordinates if \code{lonlat = FALSE}).
 #' @param occurrence_fold_type Character vector. How occurrence folds should be
-#'   generated, currently \code{"disc"} (see \code{\link{kfold_disc}}) and
-#'   \code{"random"} are supported.
+#'   generated, currently \code{"disc"} (see \code{\link{kfold_disc}}),
+#'   \code{"grid"} (see \code{\link{kfold_grid}}) and \code{"random"} are
+#'   supported.
 #' @param k Integer. The number of folds (partitions) that have to be created.
 #'   By default 5 folds are created.
 #' @param pwd_sample Logical. Whether backgound points should be picked by doing
@@ -121,7 +138,7 @@ kfold_data <- function(species_name, data, folds, fold, training) {
 #'                               longitude = runif(50, -180, 180),
 #'                               latitude = runif(50, -90, 90))
 #'
-#' # NOTE this NOT how you would want to create random background point
+#' # REMARK: this NOT how you would want to create random background point
 #' # Use special functions for this like dismo::randomPoints, especially for
 #' # lonlat data
 #' background_data <- data.frame(species = rep("background", 500),
@@ -148,6 +165,8 @@ kfold_occurrence_background <- function(occurrence_data, background_data, occurr
   }
   if(occurrence_fold_type == "disc") {
     occurrence_partitions <- kfold_disc(occurrence_data[,2:3], k, lonlat)
+  } else if(occurrence_fold_type == "grid") {
+    occurrence_partitions <- kfold_grid(occurrence_data[,2:3], k, lonlat)
   } else if (occurrence_fold_type == "random") {
     if(!requireNamespace("dismo")) {
       stop("dismo is required when occurrence_fold_type='random' in kfold_occurrence_background")
@@ -256,6 +275,84 @@ kfold_disc <- function(data, k = 5, lonlat = TRUE) {
   partitions
 }
 
+grid_split_1d <- function(x, k) {
+  row_nums <- (1:NROW(x))[order(x)]
+  splits <- stats::quantile(1:NROW(x), probs = seq(0, 1, by = 1/k))
+  result <- list()
+  for(ki in 1:k) {
+    result[[ki]] <- row_nums[ceiling(splits[ki]):floor(splits[ki+1])]
+  }
+  result
+}
+
+#' Create k grid based folds for cross-validation
+#'
+#' \code{kfold_grid} creates a k-fold partitioning of geographical data for
+#' cross-validation based on spatial grid partitioning. Returns a vector with
+#' fold numbers ranging from 1 to k.
+#'
+#' @usage kfold_grid(data, k = 4, lonlat = TRUE)
+#'
+#' @param data Matrix or dataframe. The first two columns should represent the
+#'   longitude and latitude (or x,y coordinates if \code{lonlat = FALSE}).
+#' @param k Integer. The number of folds (partitions) that have to be created.
+#'   This should be a square number (e.g 4, 9, 16). By default 4 folds are created.
+#' @param lonlat Logical. If \code{TRUE} (default) then the dateline is taken
+#'   into account (see details) else if \code{FALSE} quantiles of x and y are used as
+#'   splitting points
+#' @details If \code{lonlat = TRUE} then the data is first split along the
+#' longitude based on a random starting point and then splitting in parts with
+#' \code{k/2 points} while crossing the dateline. Then each part is splitted
+#' along quantiles of the latitude in each part.
+#'
+#' @return A vector with fold numbers ranging from 1 to k.
+#'
+#' @examples
+#' set.seed(42)
+#' lonlat_data <- cbind(runif(11, -180, 180), runif(11, -90, 90))
+#' folds <- kfold_grid(lonlat_data, k = 4)
+#' plot_folds(lonlat_data, folds)
+#'
+#' # for x,y data
+#' xy_data <- cbind(runif(11, 0, 100), runif(11, 0, 100))
+#' folds <- kfold_grid(xy_data, k = 4, lonlat = FALSE)
+#' plot_folds(xy_data, folds)
+#'
+#' @export
+kfold_grid <- function(data, k = 4, lonlat = TRUE) {
+  k <- as.integer(k)
+  k1d <- sqrt(k) # number of splits in 1 dimension
+
+  if(is.na(k) || k1d %% 1 != 0) {
+    stop("k should be a square number (x^2)")
+  } else if(k > (NROW(data)/2)) {
+    stop("k should be less than or equal to half the number of rows in data")
+  }
+  d <- as.data.frame(data[,1:2])
+
+  partitions <- integer(NROW(d))
+
+  if(k == 1) {
+    partitions <- rep(1, NROW(d))
+  }
+  if(lonlat) {
+    ## goal to enable points on the date line to be put together
+    ## picking a random new date line as new left (west) most coordinate
+    lon_start <- runif(1, -180, 180)
+    d[d[,1] < lon_start, 1] <- d[d[,1] < lon_start, 1] + 360 ## add 360 degrees
+  }
+  x_split_nums <- grid_split_1d(d[,1], k1d)
+  for(x_ki in 1:k1d) {
+    x_rows <- x_split_nums[[x_ki]]
+    y_split_nums <- grid_split_1d(d[x_rows, 2], k1d)
+    for(y_ki in 1:k1d) {
+      y_rows_in_x <- y_split_nums[[y_ki]]
+      partitions[x_rows[y_rows_in_x]] <- ((x_ki-1)*k1d) + y_ki
+    }
+  }
+  partitions
+}
+
 #' plot folds
 #'
 #' \code{plot_folds} makes a rudimentary plot of the data and the folds created
@@ -267,7 +364,8 @@ kfold_disc <- function(data, k = 5, lonlat = TRUE) {
 #'   first two columns should represent the longitude and latitude (or x,y
 #'   coordinates).
 #' @param folds NUmeric vector with group assignments from e.g.
-#'   \code{\link{kfold_disc}} or \code{\link[dismo]{kfold}}.
+#'   \code{\link{kfold_disc}}, \code{\link{kfold_grid}} or
+#'   \code{\link[dismo]{kfold}}.
 #'
 #' @examples
 #' set.seed(42)
