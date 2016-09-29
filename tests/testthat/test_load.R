@@ -4,16 +4,19 @@ context("load")
 
 setup_load <- function() {
   skip_on_cran()
+  options(marinespeed_datadir = "~/R/marinespeed")
   # skip_on_travis()
 }
-
 
 test_that("get datadir", {
   tmp <- tempdir()
   options(marinespeed_datadir=tmp)
-  expect_equal(marinespeed:::get_datadir(), tmp)
+  expect_equal(marinespeed:::get_datadir(), file.path(tmp, get_version()))
   options(marinespeed_datadir=NULL)
-  expect_true(dir.exists(marinespeed:::get_datadir()))
+  t <- function() {
+    expect_true(dir.exists(marinespeed:::get_datadir()))
+  }
+  expect_warning(t)
 })
 
 test_that("get version", {
@@ -153,6 +156,8 @@ test_that("get_folds works", {
   check_bit_folds(get_folds("targetgroup"))
   check_bit_folds(get_folds("grid_4"), k = 4)
   check_bit_folds(get_folds("grid_9"), k = 9)
+  options(marinespeed_datadir=tempdir())
+  check_bit_folds(get_folds("random"))
 })
 
 test_that("get_background works", {
@@ -163,4 +168,31 @@ test_that("get_background works", {
   }
   check_background(get_background("random"))
   check_background(get_background("targetgroup"))
+})
+
+test_that("csv2rds works", {
+  setup_load()
+
+  f <- marinespeed:::get_file("species.csv.gz")
+  f2 <- file.path(tempdir(), "species.csv.gz")
+  file.copy(f, f2)
+  sp1 <- marinespeed:::csv2rds(f2)
+  sp2 <- read.csv(f)
+  expect_equal(sp1, sp2)
+  expect_true(file.exists(file.path(tempdir(), "species.rds")))
+
+  dir <- file.path(tempdir(), "masptest")
+  if(dir.exists(dir)) { unlink(dir, recursive = TRUE) }
+  fulldir <- file.path(dir, get_version())
+  options(marinespeed_datadir = dir)
+  options(marinespeed_folds_extension = ".csv.gz")
+  f1 <- get_folds("random")
+  expect_true(file.exists(file.path(fulldir, "random_background_5cv_folds.csv.gz")))
+  expect_true(file.exists(file.path(fulldir, "random_species_5cv_folds.csv.gz")))
+  expect_true(file.exists(file.path(fulldir, "random_species_5cv_folds.rds")))
+  expect_true(file.exists(file.path(fulldir, "random_background_5cv_folds.rds")))
+  options(marinespeed_folds_extension = "_bit.rds")
+  f2 <- get_folds("random")
+  expect_true(file.exists(file.path(fulldir, "random_species_5cv_folds_bit.rds")))
+  expect_true(file.exists(file.path(fulldir, "random_background_5cv_folds_bit.rds")))
 })

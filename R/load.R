@@ -205,10 +205,12 @@ get_version <- function() {
 get_datadir <- function() {
   datadir <- getOption("marinespeed_datadir")
   if(is.null(datadir)) {
-    datadir <- normalizePath(file.path(path.expand("~"), "R", "marinespeed", get_version()))
-    if(!dir.exists(datadir)) {
-      dir.create(datadir, recursive = TRUE)
-    }
+    datadir <- file.path(tempdir(), "marinespeed")
+    warning("file.path(tempdir(), \"marinespeed\") will be used as datadir, set options(marinespeed_datadir=\"<directory>\") to avoid re-downloading the data in every session")
+  }
+  datadir <- file.path(datadir, get_version())
+  if(!dir.exists(datadir)) {
+    dir.create(datadir, recursive = TRUE)
   }
   datadir
 }
@@ -221,7 +223,7 @@ get_file <- function(filename) {
   if(!file.exists(outfile) && !dir.exists(outfile_nozip)) {
     root <- paste0("http://marinespeed.samuelbosch.com/", get_version(), "/")
     tryCatch({
-      download.file(paste0(root, filename), outfile)
+      download.file(paste0(root, filename), outfile, mode="wb")
     }, error = function(e) { file.remove(outfile)})
     if(grepl("[.]zip$", filename)) {
       unzip(outfile, exdir = outfile_nozip)
@@ -256,12 +258,12 @@ csv2rds <- function(file, extension = ".rds") {
 
     species <- folds[,1]
     for(sp in unique(species)) {
-      w <- as.which(species == sp)
+      w <- which(species == sp)
       data[["species"]][[sp]] <- c(min(w), max(w))
     }
     for(ki in 2:ncol(folds)) {
       if(any(is.na(folds[,ki]))) {
-        data[[paste0(colnames(folds)[ki], "_NOTNA")]] <- !as.bit(is.na(folds[,ki]))
+        data[[paste0(colnames(folds)[ki], "_NOTNA")]] <- !bit::as.bit(is.na(folds[,ki]))
       }
       data[[colnames(folds)[ki]]] <- as.bit(folds[,ki])
     }
@@ -352,7 +354,7 @@ get_folds <- function(type = "disc") {
   species <- get_file(paste0(species, extension))
   if(extension == ".csv.gz") {
     bg_folds <- csv2rds(bg)
-    species_folds <- csv2rds(bg)
+    species_folds <- csv2rds(species)
   } else {
     bg_folds <- readRDS(bg)
     species_folds <- readRDS(species)
