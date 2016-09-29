@@ -16,7 +16,7 @@ test_that("get datadir", {
   t <- function() {
     expect_true(dir.exists(marinespeed:::get_datadir()))
   }
-  expect_warning(t)
+  expect_warning(t())
 })
 
 test_that("get version", {

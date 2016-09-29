@@ -13,8 +13,7 @@ Imports:
     grDevices,
     geosphere,
     sp,
-    bit,
-    data.table
+    bit
 Authors@R: person("Samuel", "Bosch", email = "mail@samuelbosch.com", role = c("aut", "cre"))
 Description: A collection of marine species benchmark data sets and functions
     for species distribution modeling (SDM).
