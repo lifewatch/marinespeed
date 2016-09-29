@@ -14,7 +14,7 @@ by \code{\link{list_species}} or the name of the species.}
 \code{"disc"}.}
 
 \item{k}{integer vector. Numbers of the folds you want to get data for, if
-you want all 5-folds pass use \code{1:5}, which is the default.}
+you want all folds use \code{1:5}, which is the default.}
 }
 \value{
 A 5 element list with fold data filled in for all \code{k}. Fold data

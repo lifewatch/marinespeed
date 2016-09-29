@@ -18,8 +18,8 @@ If the file with the list of species is not present on the hard disk
 }
 \examples{
 species <- list_species()
-species$species
-species$aphia_id
+head(species)
+
 }
 \seealso{
 \code{\link{lapply_kfold_species}}, \code{\link{lapply_species}},

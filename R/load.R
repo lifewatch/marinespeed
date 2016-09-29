@@ -12,8 +12,8 @@
 #'
 #' @examples
 #' species <- list_species()
-#' species$species
-#' species$aphia_id
+#' head(species)
+#'
 #' @export
 #' @seealso \code{\link{lapply_kfold_species}}, \code{\link{lapply_species}},
 #'   \code{\link{get_fold_data}}, \code{\link{get_occurrences}},
