@@ -33,6 +33,8 @@ test_that("kfold disc returns a vector of valid folds", {
   lengths <- fold_lengths(folds, k=5)
   expect_equal(sum(lengths), 49)
   expect_equal(max(lengths) - min(lengths), 1)
+
+  plot_folds(d, folds)
 })
 
 test_that("kfold disc works with lonlat=FALSE works", {
@@ -48,6 +50,10 @@ test_that("kfold disc works with lonlat=FALSE works", {
   lengths <- fold_lengths(folds, k=5)
   expect_equal(sum(lengths), 50)
   expect_equal(max(lengths) - min(lengths), 0)
+
+  expect_error(kfold_disc(d, k=NA, lonlat = FALSE))
+  expect_error(kfold_disc(d, k=NROW(d), lonlat = FALSE))
+
 })
 
 test_that("kfold_grid returns valid folds", {
@@ -78,6 +84,13 @@ test_that("kfold_grid returns valid folds", {
   lengths <- fold_lengths(folds, k=9)
   expect_equal(sum(lengths), 44)
   expect_equal(max(lengths) - min(lengths), 1)
+
+  folds <- kfold_grid(d, k=1, lonlat = TRUE)
+  expect_true(all(folds == 1))
+
+  expect_error(kfold_grid(d, k=NA, lonlat = FALSE))
+  expect_error(kfold_grid(d, k=11, lonlat = FALSE))
+  expect_error(kfold_grid(d, k=NROW(d), lonlat = FALSE))
 })
 
 validate_folds <- function(folds) {
@@ -109,6 +122,9 @@ test_that("kfold_species_background with default settings works", {
   expect_false(is.factor(folds$occurrence[1,1]))
   expect_false(is.factor(folds$background[1,1]))
   validate_folds(folds)
+
+  expect_error(kfold_occurrence_background(occurrence_data, background_data, occurrence_fold_type = "blablabla"))
+
 })
 
 test_that("kfold_species_background with different settings works", {
@@ -156,6 +172,12 @@ test_that("kfold_species_background with different settings works", {
   validate_folds(folds7)
   expect_equal(sum(complete.cases(folds7$background)), NROW(folds7$background)) ## no background buffer so point is either training or test
 
+  set.seed(42)
+  folds7 <- kfold_occurrence_background(species, background, occurrence_fold_type = "random", background_buffer = NA)
+  expect_identical(folds6, folds7)
+  validate_folds(folds7)
+  expect_equal(sum(complete.cases(folds7$background)), NROW(folds7$background)) ## no background buffer so point is either training or test
+
   ## random, pwd_sample = F, background_buffer = 0
   set.seed(42)
   folds8 <- kfold_occurrence_background(species, background, occurrence_fold_type = "random", background_buffer = 0, pwd_sample = FALSE)
@@ -182,12 +204,11 @@ test_that("kfold_species_background with different settings works", {
   expect_equal(NCOL(folds10$occurrence), 11)
   expect_equal(NCOL(folds10$background), 11)
   validate_folds(folds10)
-})
 
-plot_folds <- function(d, folds, k=5) {
-  plot(d, pch=".")
-  cols <- rainbow(k)
-  for(i in 1:k) {
-    text(d[folds==i,], labels = i, pch=20, col=cols[i])
-  }
-}
+  ## occurrence_fold_type = "grid"
+  set.seed(42)
+  folds11 <- kfold_occurrence_background(species, background, occurrence_fold_type = "grid", k=4)
+  expect_false(identical(folds1, folds11))
+  validate_folds(folds11)
+  expect_lt(sum(complete.cases(folds11$background)), NROW(folds11$background)) ## background points filtered out
+})

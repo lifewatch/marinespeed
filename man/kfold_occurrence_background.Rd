@@ -35,8 +35,9 @@ sampling.}
 are calculated else if \code{FALSE} Euclidean (planar) distances are
 calculated.}
 
-\item{background_buffer}{Numeric. Distance in meters around species test
-points where background data should be excluded from.}
+\item{background_buffer}{Positive numeric. Distance in meters around species
+test points where background data should be excluded from. Use \code{NA} or
+a negative number to disable background point filtering.}
 }
 \value{
 A list with 2 dataframes, \code{occurrence} and \code{background},
@@ -68,7 +69,7 @@ occurrence_data <- data.frame(species = rep("Abalistes stellatus", 50),
                               longitude = runif(50, -180, 180),
                               latitude = runif(50, -90, 90))
 
-# REMARK: this NOT how you would want to create random background point
+# REMARK: this is NOT how you would want to create random background point.
 # Use special functions for this like dismo::randomPoints, especially for
 # lonlat data
 background_data <- data.frame(species = rep("background", 500),
@@ -78,7 +79,7 @@ disc_folds <- kfold_occurrence_background(occurrence_data, background_data,
                                           "disc")
 random_folds <- kfold_occurrence_background(occurrence_data, background_data,
                                             "random", pwd_sample = FALSE,
-                                            background_buffer = 0)
+                                            background_buffer = NA)
 
 }
 \references{
@@ -90,7 +91,8 @@ Hijmans, R. J. (2012). Cross-validation of species distribution
   Biogeography. doi:10.1111/jbi.12227
 }
 \seealso{
-\code{\link{kfold_disc}} \code{\link{geographic_filter}}
-  \code{\link[dismo]{pwdSample}}
+\code{\link{lapply_kfold_species}}, \code{\link{kfold_disc}},
+  \code{\link{kfold_grid}}, \code{\link{geographic_filter}}
+  \code{\link[dismo]{pwdSample}}, \code{\link[dismo]{kfold}}
 }
 

@@ -31,7 +31,7 @@ first10 <- get_occurrences(species[1:10,])
 }
 }
 \seealso{
-\code{\link{list_species}} \code{\link{get_fold_data}}
-  \code{\link{get_background}}
+\code{\link{lapply_species}}, \code{\link{get_fold_data}},
+  \code{\link{list_species}}, \code{\link{get_background}}
 }
 

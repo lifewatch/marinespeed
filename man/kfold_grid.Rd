@@ -43,4 +43,8 @@ folds <- kfold_grid(xy_data, k = 4, lonlat = FALSE)
 plot_folds(xy_data, folds)
 
 }
+\seealso{
+\code{\link{plot_folds}}, \code{\link{kfold_disc}},
+  \code{\link[dismo]{kfold}}, , \code{\link{kfold_occurrence_background}}
+}
 

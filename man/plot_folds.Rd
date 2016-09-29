@@ -26,4 +26,8 @@ folds <- kfold_disc(lonlat_data, k = 5)
 plot_folds(lonlat_data, folds)
 
 }
+\seealso{
+\code{\link{kfold_disc}}, \code{\link{kfold_grid}},
+  \code{\link[dismo]{kfold}}
+}
 

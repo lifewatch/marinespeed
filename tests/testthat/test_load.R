@@ -59,6 +59,9 @@ test_that("get occurrences works", {
   expect_gt(NROW(occ), 10)
   expect_gt(NCOL(occ), 50)
   expect_equal(length(unique(occ$species)), 3)
+
+  expect_error(get_occurrences("Blabla blabla"))
+
 })
 
 test_that("get_fold_data random", {
@@ -108,6 +111,27 @@ test_that("get_fold_data random", {
 
   folds <- get_fold_data("Dinoperca petersi", fold_type = "disc", k=1:5)
   lapply(folds, check_fold)
+
+  folds <- get_fold_data("Dinoperca petersi", fold_type = "grid_9", k=c(1, 3, 9))
+  lapply(folds, check_fold)
+
+  options(marinespeed_folds_extension = ".csv.gz")
+  f1 <- get_fold_data("Dinoperca petersi", fold_type = "grid_4", k=c(1, 4))
+  lapply(f1, check_fold)
+
+  options(marinespeed_folds_extension = "_bit.rds")
+  f2 <- get_fold_data("Dinoperca petersi", fold_type = "grid_4", k=c(1, 4))
+  expect_equal(f1, f2)
+
+  expect_error(get_fold_data(c("Dinoperca petersi", "Abra alba")))
+  expect_error(get_fold_data("Dinoperca petersi", fold_type = "grid_9", k=0))
+  expect_error(get_fold_data("Dinoperca petersi", fold_type = "grid_9", k=10))
+  expect_error(get_fold_data("Dinoperca petersi", fold_type = "grid_4", k=5))
+  expect_error(get_fold_data("Dinoperca petersi", fold_type = "random", k=6))
+  expect_error(get_fold_data("Dinoperca petersi", fold_type = "random", k=c(1,2,6)))
+  expect_error(get_fold_data("Dinoperca petersi", fold_type = "blablabla", k=1))
+  expect_error(get_fold_data("Dinoperca petersi", fold_type = "random", k=NA))
+  expect_error(get_fold_data(1, fold_type = "random", k=1))
 })
 
 test_that("get_file works", {
@@ -158,6 +182,8 @@ test_that("get_folds works", {
   check_bit_folds(get_folds("grid_9"), k = 9)
   options(marinespeed_datadir=tempdir())
   check_bit_folds(get_folds("random"))
+
+  expect_error(get_folds("blabla"))
 })
 
 test_that("get_background works", {
@@ -168,6 +194,8 @@ test_that("get_background works", {
   }
   check_background(get_background("random"))
   check_background(get_background("targetgroup"))
+
+  expect_error(get_background("blabla"))
 })
 
 test_that("csv2rds works", {
@@ -191,8 +219,14 @@ test_that("csv2rds works", {
   expect_true(file.exists(file.path(fulldir, "random_species_5cv_folds.csv.gz")))
   expect_true(file.exists(file.path(fulldir, "random_species_5cv_folds.rds")))
   expect_true(file.exists(file.path(fulldir, "random_background_5cv_folds.rds")))
+
   options(marinespeed_folds_extension = "_bit.rds")
   f2 <- get_folds("random")
   expect_true(file.exists(file.path(fulldir, "random_species_5cv_folds_bit.rds")))
   expect_true(file.exists(file.path(fulldir, "random_background_5cv_folds_bit.rds")))
+
+  rand_bg <- marinespeed:::csv2rds(file.path(fulldir, "random_background_5cv_folds.csv.gz"), "_bit.rds")
+  expect_equal(rand_bg, f2$background)
+
+  expect_error(marinespeed:::csv2rds("blablabla.txt"))
 })

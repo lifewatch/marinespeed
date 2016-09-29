@@ -11,7 +11,7 @@
 #' @param filter_data Matrix or dataframe. The first two columns should
 #'   represent the longitude and latitude (or x,y coordinates if \code{lonlat =
 #'   FALSE}).
-#' @param buffer_distance Positive number. The minimal distance a point in
+#' @param buffer_distance Positive numeric. The minimal distance a point in
 #'   \code{data} should be from a point in \code{filter_data}.
 #' @param lonlat Logical. If \code{TRUE} (default) then Great Circle distances
 #'   are calculated else Euclidean (planar) distances are calculated.
@@ -32,8 +32,9 @@
 #' data_removed <- data[-filtered,]
 #'
 #' @export
+#' @seealso \code{\link{kfold_occurrence_background}}
 geographic_filter <- function(data, filter_data, buffer_distance=200*1000, lonlat = TRUE) {
-  if(buffer_distance <= 0) {
+  if(buffer_distance < 0) {
     stop("buffer_distance should be positive")
   }
   distfun <- get_distfun(lonlat)
@@ -43,7 +44,7 @@ geographic_filter <- function(data, filter_data, buffer_distance=200*1000, lonla
   for(i in 1:NROW(filter_data)) {
     if(NROW(data) > 0) {
       dists <- distfun(filter_data[i,,drop = FALSE], data)
-      new_removed <- which(dists < buffer_distance)
+      new_removed <- which(dists <= buffer_distance)
       if(length(new_removed) > 0) {
         data <- data[-new_removed,]
         removed <- c(removed, new_removed)

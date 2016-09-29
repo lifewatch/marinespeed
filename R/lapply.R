@@ -1,23 +1,26 @@
 #' Apply a function over a set of species
 #'
-#' \code{lapply_species} returns a list where each element is the result of applying \code{fun} to
-#' all species or the provided subset of species.
+#' \code{lapply_species} returns a list where each element is the result of
+#' applying \code{fun} to all species or the provided subset of species.
 #'
 #' @usage lapply_species(fun, ..., species = NULL, raw = FALSE)
 #'
-#' @param fun function. The function to be applied to the occurrence records of each species.
-#'   Parameters are the species name and a dataframe with the occurrence records.
+#' @param fun function. The function to be applied to the occurrence records of
+#'   each species. Parameters are the species name and a dataframe with the
+#'   occurrence records.
 #' @param ... optional arguments to \code{fun}.
 #' @param species dataframe or character vector. Dataframe like returned by
-#'   \code{\link{list_species}} or the names of the species. If \code{NULL} (default) then
-#'   \code{fun} is applied for all species.
-#' @param raw logical. If \code{FALSE} then 25 square kilometer grid and manual outlier filtered
-#'   occurrence records are returned.
+#'   \code{\link{list_species}} or the names of the species. If \code{NULL}
+#'   (default) then \code{fun} is applied for all species.
+#' @param raw logical. If \code{FALSE} then 25 square kilometer grid and manual
+#'   outlier filtered occurrence records are returned.
 #'
-#' @details The parameters passed to \code{fun} are \code{speciesname} and \code{data}, which is a
-#'   dataframe with the occurrence records and their environmental data.
+#' @details The parameters passed to \code{fun} are \code{speciesname} and
+#'   \code{data}, which is a dataframe with the occurrence records and their
+#'   environmental data.
 #'
-#' @return A list with one named entry for every species provided or for all species.
+#' @return A list with one named entry for every species provided or for all
+#'   species.
 #'
 #' @seealso \code{\link{list_species}} \code{\link{lapply_kfold_species}}
 #'   \code{\link{get_occurrences}}
@@ -35,6 +38,8 @@
 #' lapply_species(get_occ_count, species=species[1:10,])
 #' }
 #' @export
+#' @seealso \code{\link{lapply_kfold_species}}, \code{\link{get_occurrences}},
+#'   \code{\link{list_species}}
 lapply_species <- function(fun, ..., species = NULL, raw = FALSE) {
   fun <- match.fun(fun)
   result <- list()
@@ -124,6 +129,8 @@ lapply_species <- function(fun, ..., species = NULL, raw = FALSE) {
 #'                      fold_type = "disc", k = 1:2)
 #' }
 #' @export
+#' @seealso \code{\link{lapply_species}}, \code{\link{get_fold_data}},
+#'   \code{\link{list_species}}
 lapply_kfold_species <- function(fun, ..., species = NULL, fold_type = "disc", k = 1:5) {
   fun <- match.fun(fun)
   result <- list()

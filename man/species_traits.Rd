@@ -16,7 +16,8 @@ Traits information includes information about the taxonomy from the
 }
 \examples{
 traits <- species_traits()
-traits$kingdom
+unique(traits$kingdom)
+colnames(traits)
 }
 \seealso{
 \code{\link{list_species}}

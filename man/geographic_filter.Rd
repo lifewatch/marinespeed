@@ -15,7 +15,7 @@ longitude and latitude (or x,y coordinates if \code{lonlat = FALSE}).}
 represent the longitude and latitude (or x,y coordinates if \code{lonlat =
 FALSE}).}
 
-\item{buffer_distance}{Positive number. The minimal distance a point in
+\item{buffer_distance}{Positive numeric. The minimal distance a point in
 \code{data} should be from a point in \code{filter_data}.}
 
 \item{lonlat}{Logical. If \code{TRUE} (default) then Great Circle distances
@@ -41,5 +41,8 @@ filtered <- geographic_filter(data, filter_data, buffer_distance = 1000*1000,
 data_filtered <- data[filtered,]
 data_removed <- data[-filtered,]
 
+}
+\seealso{
+\code{\link{kfold_occurrence_background}}
 }
 

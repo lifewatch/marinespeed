@@ -54,4 +54,7 @@ bg_test <- kfold_data("Abalistes stellatus", bg_data, folds$background,
                       fold = 1, training = FALSE)
 
 }
+\seealso{
+\code{\link{lapply_kfold_species}}, \code{\link{get_fold_data}}
+}
 

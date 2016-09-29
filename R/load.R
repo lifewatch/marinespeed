@@ -7,16 +7,17 @@
 #'
 #' @details If the file with the list of species is not present on the hard disk
 #'   then it is downloaded and stored in the data directory. The data directory
-#'   can be set with \code{options(marinespeed_datadir = ".")}.
+#'   can be set with \code{options(marinespeed_datadir = ".")}. By default data
+#'   is downloaded to \code{tempdir()}.
 #'
-#' @seealso \code{\link{lapply_kfold_species}} \code{\link{lapply_species}}
-#'   \code{\link{get_fold_data}} \code{\link{get_occurrences}}
-#'   \code{\link{species_traits}}
 #' @examples
 #' species <- list_species()
 #' species$species
 #' species$aphia_id
 #' @export
+#' @seealso \code{\link{lapply_kfold_species}}, \code{\link{lapply_species}},
+#'   \code{\link{get_fold_data}}, \code{\link{get_occurrences}},
+#'   \code{\link{species_traits}}
 list_species <- function() {
   csv2rds(get_file("species.csv.gz"))
 }
@@ -31,12 +32,12 @@ list_species <- function() {
 #'   World Register of Marine Species (WoRMS) and habitat traits from the
 #'   Encyclopedia of Life (EOL).
 #'
-#' @seealso \code{\link{list_species}}
-#'
 #' @examples
 #' traits <- species_traits()
-#' traits$kingdom
+#' unique(traits$kingdom)
+#' colnames(traits)
 #' @export
+#' @seealso \code{\link{list_species}}
 species_traits <- function() {
   csv2rds(get_file("traits.csv.gz"))
 }
@@ -57,9 +58,6 @@ species_traits <- function() {
 #' @return Dataframe with as columns: species, longitude, latitude and the
 #'   environmental variable columns.
 #'
-#' @seealso \code{\link{list_species}} \code{\link{get_fold_data}}
-#'   \code{\link{get_background}}
-#'
 #' @examples \dontrun{
 #' abalistes_stellatus <- get_occurrences("Abalistes stellatus")
 #'
@@ -67,6 +65,8 @@ species_traits <- function() {
 #' first10 <- get_occurrences(species[1:10,])
 #' }
 #' @export
+#' @seealso \code{\link{lapply_species}}, \code{\link{get_fold_data}},
+#'   \code{\link{list_species}}, \code{\link{get_background}}
 get_occurrences <- function(species = NULL, raw = FALSE) {
   if(raw) {
     dir <- get_file("occurrences_raw.zip")
@@ -131,9 +131,6 @@ get_occurrences <- function(species = NULL, raw = FALSE) {
 #'   \code{occurrence_test}, \code{background_training} and
 #'   \code{background_test}.
 #'
-#' @seealso \code{\link{list_species}} \code{\link{lapply_kfold_species}}
-#'   \code{\link{lapply_species}} \code{\link{kfold_data}}
-#'
 #' @examples \dontrun{
 #' aba_folds <- get_fold_data("Abalistes stellatus", "random", k = 1:5)
 #' k1 <- aba_folds[[1]]
@@ -143,6 +140,8 @@ get_occurrences <- function(species = NULL, raw = FALSE) {
 #' k1$background_test
 #' }
 #' @export
+#' @seealso \code{\link{list_species}} \code{\link{lapply_kfold_species}}
+#'   \code{\link{lapply_species}} \code{\link{kfold_data}}
 get_fold_data <- function(species, fold_type, k) {
   if(NROW(species) > 1) {
     ## otherwise might get into memory problems
@@ -223,7 +222,7 @@ get_file <- function(filename) {
   if(!file.exists(outfile) && !dir.exists(outfile_nozip)) {
     root <- paste0("http://marinespeed.samuelbosch.com/", get_version(), "/")
     tryCatch({
-      download.file(paste0(root, filename), outfile, mode="wb")
+      utils::download.file(paste0(root, filename), outfile, mode="wb")
     }, error = function(e) { file.remove(outfile)})
     if(grepl("[.]zip$", filename)) {
       unzip(outfile, exdir = outfile_nozip)
@@ -311,10 +310,6 @@ csv2rds <- function(file, extension = ".rds") {
 #'   each entry is a dataframe with species name column and 5 fold columns as
 #'   created by \code{\link{kfold_occurrence_background}}
 #'
-#' @seealso \code{\link{lapply_kfold_species}} \code{\link{get_fold_data}}
-#'   \code{\link{get_occurrences}} \code{\link{get_background}}
-#'   \code{\link{kfold_data}}
-#'
 #' @examples \dontrun{
 #' folds <- get_folds("random")
 #'
@@ -328,6 +323,9 @@ csv2rds <- function(file, extension = ".rds") {
 #' bg_test <- kfold_data(abalistes, bg, folds$background, k=1, training=FALSE)
 #' }
 #' @export
+#' @seealso \code{\link{lapply_kfold_species}} \code{\link{get_fold_data}}
+#'   \code{\link{get_occurrences}} \code{\link{get_background}}
+#'   \code{\link{kfold_data}}
 get_folds <- function(type = "disc") {
   type <- as.character(type)
   if(type == "disc") {
@@ -377,9 +375,6 @@ get_folds <- function(type = "disc") {
 #'
 #' @return A dataframe with all background points.
 #'
-#' @seealso \code{\link{get_fold_data}} \code{\link{get_occurrences}}
-#'   \code{\link{get_folds}}
-#'
 #' @examples \dontrun{
 #' random_bg <- get_background("random")
 #' plot(random_bg[,2:3], pch=".", main="random background")
@@ -388,6 +383,8 @@ get_folds <- function(type = "disc") {
 #' plot(targetgroup_bg[,2:3], pch=".", main="targetgroup background")
 #' }
 #' @export
+#' @seealso \code{\link{get_fold_data}} \code{\link{get_occurrences}}
+#'   \code{\link{get_folds}}
 get_background <- function(type) {
   if(!(as.character(type) %in% c("random", "targetgroup"))) {
     stop("background type not recognized")

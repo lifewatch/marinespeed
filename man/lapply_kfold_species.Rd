@@ -85,5 +85,8 @@ lapply_kfold_species(plot_occurrences, species=species[1:5,],
 \seealso{
 \code{\link{list_species}} \code{\link{lapply_species}}
   \code{\link{get_fold_data}}
+
+\code{\link{lapply_species}}, \code{\link{get_fold_data}},
+  \code{\link{list_species}}
 }
 

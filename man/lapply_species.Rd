@@ -7,28 +7,31 @@
 lapply_species(fun, ..., species = NULL, raw = FALSE)
 }
 \arguments{
-\item{fun}{function. The function to be applied to the occurrence records of each species.
-Parameters are the species name and a dataframe with the occurrence records.}
+\item{fun}{function. The function to be applied to the occurrence records of
+each species. Parameters are the species name and a dataframe with the
+occurrence records.}
 
 \item{...}{optional arguments to \code{fun}.}
 
 \item{species}{dataframe or character vector. Dataframe like returned by
-\code{\link{list_species}} or the names of the species. If \code{NULL} (default) then
-\code{fun} is applied for all species.}
+\code{\link{list_species}} or the names of the species. If \code{NULL}
+(default) then \code{fun} is applied for all species.}
 
-\item{raw}{logical. If \code{FALSE} then 25 square kilometer grid and manual outlier filtered
-occurrence records are returned.}
+\item{raw}{logical. If \code{FALSE} then 25 square kilometer grid and manual
+outlier filtered occurrence records are returned.}
 }
 \value{
-A list with one named entry for every species provided or for all species.
+A list with one named entry for every species provided or for all
+  species.
 }
 \description{
-\code{lapply_species} returns a list where each element is the result of applying \code{fun} to
-all species or the provided subset of species.
+\code{lapply_species} returns a list where each element is the result of
+applying \code{fun} to all species or the provided subset of species.
 }
 \details{
-The parameters passed to \code{fun} are \code{speciesname} and \code{data}, which is a
-  dataframe with the occurrence records and their environmental data.
+The parameters passed to \code{fun} are \code{speciesname} and
+  \code{data}, which is a dataframe with the occurrence records and their
+  environmental data.
 }
 \examples{
 \dontrun{
@@ -47,5 +50,8 @@ lapply_species(get_occ_count, species=species[1:10,])
 \seealso{
 \code{\link{list_species}} \code{\link{lapply_kfold_species}}
   \code{\link{get_occurrences}}
+
+\code{\link{lapply_kfold_species}}, \code{\link{get_occurrences}},
+  \code{\link{list_species}}
 }
 

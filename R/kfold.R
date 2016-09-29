@@ -43,6 +43,7 @@
 #'                       fold = 1, training = FALSE)
 #'
 #' @export
+#' @seealso \code{\link{lapply_kfold_species}}, \code{\link{get_fold_data}}
 kfold_data <- function(species_name, data, folds, fold, training) {
   if(length(fold) != 1) {
     stop("fold should be of length 1")
@@ -105,8 +106,9 @@ kfold_data <- function(species_name, data, folds, fold, training) {
 #' @param lonlat Logical. If \code{TRUE} (default) then Great Circle distances
 #'   are calculated else if \code{FALSE} Euclidean (planar) distances are
 #'   calculated.
-#' @param background_buffer Numeric. Distance in meters around species test
-#'   points where background data should be excluded from.
+#' @param background_buffer Positive numeric. Distance in meters around species
+#'   test points where background data should be excluded from. Use \code{NA} or
+#'   a negative number to disable background point filtering.
 #'
 #' @return A list with 2 dataframes, \code{occurrence} and \code{background},
 #'   with as first column the scientifc name or \code{"background"} and k
@@ -130,15 +132,13 @@ kfold_data <- function(species_name, data, folds, fold, training) {
 #'   distributions: complexity, overfitting and evaluation. Journal of
 #'   Biogeography. doi:10.1111/jbi.12227
 #'
-#' @seealso \code{\link{kfold_disc}} \code{\link{geographic_filter}}
-#'   \code{\link[dismo]{pwdSample}}
 #' @examples
 #' set.seed(42)
 #' occurrence_data <- data.frame(species = rep("Abalistes stellatus", 50),
 #'                               longitude = runif(50, -180, 180),
 #'                               latitude = runif(50, -90, 90))
 #'
-#' # REMARK: this NOT how you would want to create random background point
+#' # REMARK: this is NOT how you would want to create random background point.
 #' # Use special functions for this like dismo::randomPoints, especially for
 #' # lonlat data
 #' background_data <- data.frame(species = rep("background", 500),
@@ -148,9 +148,12 @@ kfold_data <- function(species_name, data, folds, fold, training) {
 #'                                           "disc")
 #' random_folds <- kfold_occurrence_background(occurrence_data, background_data,
 #'                                             "random", pwd_sample = FALSE,
-#'                                             background_buffer = 0)
+#'                                             background_buffer = NA)
 #'
 #' @export
+#' @seealso \code{\link{lapply_kfold_species}}, \code{\link{kfold_disc}},
+#'   \code{\link{kfold_grid}}, \code{\link{geographic_filter}}
+#'   \code{\link[dismo]{pwdSample}}, \code{\link[dismo]{kfold}}
 kfold_occurrence_background <- function(occurrence_data, background_data, occurrence_fold_type = "disc", k = 5, pwd_sample = TRUE, lonlat = TRUE, background_buffer = 200*1000) {
   # 1) partition species presences with pseudo-discs (1st fold = real disc, other folds = )
   # 2) select testing background points with pairwise distance sampling (pwdSample) to reduce spatial sorting bias
@@ -192,7 +195,7 @@ kfold_occurrence_background <- function(occurrence_data, background_data, occurr
     background_test_i <- unique(na.omit(as.vector(test_sample)))
     background_training_i <- base::setdiff(1:NROW(background_data), background_test_i)
 
-    if(background_buffer > 0) {
+    if(!is.na(background_buffer) && background_buffer >= 0) {
       filtered <- geographic_filter(background_data[background_training_i,2:3], occurrence_test, background_buffer, lonlat)
       background_training_i <- (1:NROW(background_data))[background_training_i][filtered]
     }
@@ -237,6 +240,8 @@ kfold_occurrence_background <- function(occurrence_data, background_data, occurr
 #' plot_folds(xy_data, folds)
 #'
 #' @export
+#' @seealso \code{\link{plot_folds}}, \code{\link{kfold_grid}},
+#'   \code{\link[dismo]{kfold}}, \code{\link{kfold_occurrence_background}}
 kfold_disc <- function(data, k = 5, lonlat = TRUE) {
   distfun <- get_distfun(lonlat)
   k <- as.integer(k)
@@ -319,6 +324,8 @@ grid_split_1d <- function(x, k) {
 #' plot_folds(xy_data, folds)
 #'
 #' @export
+#' @seealso \code{\link{plot_folds}}, \code{\link{kfold_disc}},
+#'   \code{\link[dismo]{kfold}}, , \code{\link{kfold_occurrence_background}}
 kfold_grid <- function(data, k = 4, lonlat = TRUE) {
   k <- as.integer(k)
   k1d <- sqrt(k) # number of splits in 1 dimension
@@ -374,6 +381,8 @@ kfold_grid <- function(data, k = 4, lonlat = TRUE) {
 #' plot_folds(lonlat_data, folds)
 #'
 #' @export
+#' @seealso \code{\link{kfold_disc}}, \code{\link{kfold_grid}},
+#'   \code{\link[dismo]{kfold}}
 plot_folds <- function(data, folds) {
   graphics::plot(data, pch=".")
   k <- max(folds)
