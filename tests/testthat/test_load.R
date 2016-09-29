@@ -60,16 +60,16 @@ test_that("get occurrences works", {
   expect_gt(NCOL(occ), 50)
   expect_equal(length(unique(occ$species)), 3)
 
-  expect_error(get_occurrences("Blabla blabla"))
+  expect_warning(get_occurrences("Blabla blabla"))
 
 })
 
-test_that("get_fold_data random", {
+test_that("get_fold_data different variations", {
   setup_load()
 
   check_fold <- function(fold) {
-    expect_gt(NROW(fold$occurrence_training), 10)
-    expect_gt(NROW(fold$occurrence_test), 10)
+    expect_gt(NROW(fold$occurrence_training), 9)
+    expect_gt(NROW(fold$occurrence_test), 9)
     expect_true(all(complete.cases(fold$occurrence_training)))
     expect_true(all(complete.cases(fold$occurrence_test)))
     expect_false(NROW(fold$occurrence_training) == NROW(fold$occurrence_test))
@@ -112,12 +112,17 @@ test_that("get_fold_data random", {
   folds <- get_fold_data("Dinoperca petersi", fold_type = "disc", k=1:5)
   lapply(folds, check_fold)
 
-  folds <- get_fold_data("Dinoperca petersi", fold_type = "grid_9", k=c(1, 3, 9))
-  lapply(folds, check_fold)
+  folds <- get_fold_data(species="Dinoperca petersi", fold_type = "grid_9", k=c(1, 3, 9))
+  check_fold(folds[[1]])
+  check_fold(folds[[3]])
+  check_fold(folds[[9]])
+  for(i in c(2,4:8)) expect_null(folds[[i]])
 
   options(marinespeed_folds_extension = ".csv.gz")
   f1 <- get_fold_data("Dinoperca petersi", fold_type = "grid_4", k=c(1, 4))
-  lapply(f1, check_fold)
+  check_fold(f1[[1]])
+  check_fold(f1[[4]])
+  for(i in 2:3) expect_null(f1[[i]])
 
   options(marinespeed_folds_extension = "_bit.rds")
   f2 <- get_fold_data("Dinoperca petersi", fold_type = "grid_4", k=c(1, 4))

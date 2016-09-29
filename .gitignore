@@ -16,3 +16,4 @@ vignettes/*.pdf
 inst/doc
 vignettes/*.jpeg
 vignettes/quickstart_cache
+tests/testthat/Rplots.pdf

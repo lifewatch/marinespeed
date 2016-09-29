@@ -100,7 +100,7 @@ get_occurrences <- function(species = NULL, raw = FALSE) {
 #' @param fold_type character. Type of partitioning you want to use, default is
 #'   \code{"disc"}.
 #' @param k integer vector. Numbers of the folds you want to get data for, if
-#'   you want all 5-folds pass use \code{1:5}, which is the default.
+#'   you want all folds use \code{1:5}, which is the default.
 #'
 #' @details The different \code{fold_type} are:
 #'
@@ -142,7 +142,7 @@ get_occurrences <- function(species = NULL, raw = FALSE) {
 #' @export
 #' @seealso \code{\link{list_species}} \code{\link{lapply_kfold_species}}
 #'   \code{\link{lapply_species}} \code{\link{kfold_data}}
-get_fold_data <- function(species, fold_type, k) {
+get_fold_data <- function(species, fold_type, k = NULL) {
   if(NROW(species) > 1) {
     ## otherwise might get into memory problems
     stop("get_fold_data expects only 1 species")
@@ -150,6 +150,9 @@ get_fold_data <- function(species, fold_type, k) {
   max_k <- 5
   max_k <- ifelse(fold_type == "grid_4", 4, max_k)
   max_k <- ifelse(fold_type == "grid_9", 9, max_k)
+  if(is.null(k)) {
+    k <- 1:max_k
+  }
   if(min(k) < 1 || max(k) > max_k) {
     stop(paste0("k should be between 1 and ", max_k))
   }
@@ -161,9 +164,7 @@ get_fold_data <- function(species, fold_type, k) {
   } else {
     bg <- get_background("random")
   }
-#   specieslist <- list()
-#   for (si in 1:length(species)) {
-  klist <- list(NULL, NULL, NULL, NULL, NULL)
+  klist <- lapply(1:max_k, function(t) NULL)
   for (fold in k) {
     occ_train <- kfold_data(species, occurrences, folds$species, fold, training = TRUE)
     occ_test <- kfold_data(species, occurrences, folds$species, fold, training = FALSE)
