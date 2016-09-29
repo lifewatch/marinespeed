@@ -23,6 +23,10 @@ Three functions help with exploring
 ```{r}
 library(marinespeed)
 
+# set a data directory, preferably something different from tempdir to avoid 
+# unnecessary downloads for every R session
+options(marinespeed_datadir = tempdir())
+
 # list all species
 species <- list_species()
 ```

@@ -265,7 +265,7 @@ csv2rds <- function(file, extension = ".rds") {
       if(any(is.na(folds[,ki]))) {
         data[[paste0(colnames(folds)[ki], "_NOTNA")]] <- !bit::as.bit(is.na(folds[,ki]))
       }
-      data[[colnames(folds)[ki]]] <- as.bit(folds[,ki])
+      data[[colnames(folds)[ki]]] <- bit::as.bit(folds[,ki])
     }
     saveRDS(data, rds_file)
   } else if(is.null(data)) {
