@@ -29,13 +29,17 @@ test_that("get version", {
 
 test_that("get file works and handles errors", {
   check <- function(filename, should_exist) {
-    p <-file.path(marinespeed:::get_datadir(), marinespeed:::get_version(), filename)
+    p <-file.path(marinespeed:::get_datadir(), filename)
     if(file.exists(p)) file.remove(p)
-    get_file(filename)
+    if(should_exist) {
+      marinespeed:::get_file(filename)
+    } else {
+      expect_error(marinespeed:::get_file(filename))
+    }
     expect_equal(file.exists(p), should_exist)
   }
-  check("species.csv.gz", should_exist = TRUE)
-  check("blablabla.csv.gz", should_exist = TRUE)
+  check(filename = "species.csv.gz", should_exist = TRUE)
+  check("blablabla.csv.gz", should_exist = FALSE)
 })
 
 test_that("list species", {
