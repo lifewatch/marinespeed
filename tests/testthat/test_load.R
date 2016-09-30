@@ -27,6 +27,17 @@ test_that("get version", {
   expect_equal(get_version(), "v1")
 })
 
+test_that("get file works and handles errors", {
+  check <- function(filename, should_exist) {
+    p <-file.path(marinespeed:::get_datadir(), marinespeed:::get_version(), filename)
+    if(file.exists(p)) file.remove(p)
+    get_file(filename)
+    expect_equal(file.exists(p), should_exist)
+  }
+  check("species.csv.gz", should_exist = TRUE)
+  check("blablabla.csv.gz", should_exist = TRUE)
+})
+
 test_that("list species", {
   setup_load()
 

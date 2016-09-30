@@ -222,9 +222,14 @@ get_file <- function(filename) {
   outfile_nozip <- file.path(datadir,sub("[.]zip$", "", filename))
   if(!file.exists(outfile) && !dir.exists(outfile_nozip)) {
     root <- paste0("http://marinespeed.samuelbosch.com/", get_version(), "/")
+    ok <- -1
     tryCatch({
-      utils::download.file(paste0(root, filename), outfile, mode="wb")
-    }, error = function(e) { file.remove(outfile)})
+      ok <- utils::download.file(paste0(root, filename), outfile, mode="wb")
+    }, finally = {
+      if(ok != 0 && file.exists(outfile)) {
+        file.remove(outfile)
+      }
+    })
     if(grepl("[.]zip$", filename)) {
       unzip(outfile, exdir = outfile_nozip)
       file.remove(outfile)
