@@ -19,6 +19,7 @@ Description: A collection of marine species benchmark data sets and functions
     for species distribution modelling (ecological niche modelling).
 License: GPL (>= 3)
 URL: http://www.samuelbosch.com/p/marinespeed.html
+BugReports: https://github.com/samuelbosch/marinespeed/issues
 LazyData: TRUE
 Suggests:
     biomod2,

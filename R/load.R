@@ -17,28 +17,28 @@
 #' @export
 #' @seealso \code{\link{lapply_kfold_species}}, \code{\link{lapply_species}},
 #'   \code{\link{get_fold_data}}, \code{\link{get_occurrences}},
-#'   \code{\link{species_traits}}
+#'   \code{\link{species_info}}
 list_species <- function() {
   csv2rds(get_file("species.csv.gz"))
 }
 
-#' Species traits
+#' Species information
 #'
-#' \code{species_traits} returns a dataframe with species traits information.
+#' \code{species_info} returns a dataframe with species information.
 #'
-#' @usage species_traits()
+#' @usage species_info()
 #'
-#' @details Traits information includes information about the taxonomy from the
-#'   World Register of Marine Species (WoRMS) and habitat traits from the
-#'   Encyclopedia of Life (EOL).
+#' @details Information about the taxonomy from the
+#'   World Register of Marine Species (WoRMS), information on the covered
+#'   latitudinal zones and the level of sample selection bias.
 #'
 #' @examples
-#' traits <- species_traits()
-#' unique(traits$kingdom)
-#' colnames(traits)
+#' info <- species_info()
+#' unique(info$kingdom)
+#' colnames(info)
 #' @export
 #' @seealso \code{\link{list_species}}
-species_traits <- function() {
+species_info <- function() {
   csv2rds(get_file("traits.csv.gz"))
 }
 
@@ -239,7 +239,7 @@ get_file <- function(filename) {
 }
 
 get_species_names <- function(species) {
-  if(NCOL(species) == 2 && colnames(species) == c("species", "aphia_id")) {
+  if(NCOL(species) >= 2 && all(c("species", "aphia_id") %in% colnames(species))) {
     species <- species[,"species"]
   }
   if(!is.character(species) && !is.factor(species)){

@@ -107,7 +107,7 @@ kfold_data <- function(species_name, data, folds, fold, training) {
 #'   are calculated else if \code{FALSE} Euclidean (planar) distances are
 #'   calculated.
 #' @param background_buffer Positive numeric. Distance in meters around species
-#'   test points where background data should be excluded from. Use \code{NA} or
+#'   test points where training background data should be excluded from. Use \code{NA} or
 #'   a negative number to disable background point filtering.
 #'
 #' @return A list with 2 dataframes, \code{occurrence} and \code{background},
@@ -370,9 +370,11 @@ kfold_grid <- function(data, k = 4, lonlat = TRUE) {
 #' @param data Matrix or dataframe. Data for which the folds where created. The
 #'   first two columns should represent the longitude and latitude (or x,y
 #'   coordinates).
-#' @param folds NUmeric vector with group assignments from e.g.
+#' @param folds Numeric vector with group assignments from e.g.
 #'   \code{\link{kfold_disc}}, \code{\link{kfold_grid}} or
 #'   \code{\link[dismo]{kfold}}.
+#' @param colors Colors to use for the different folds
+#' @param ... Arguments to be passed to the plot function.
 #'
 #' @examples
 #' set.seed(42)
@@ -383,11 +385,13 @@ kfold_grid <- function(data, k = 4, lonlat = TRUE) {
 #' @export
 #' @seealso \code{\link{kfold_disc}}, \code{\link{kfold_grid}},
 #'   \code{\link[dismo]{kfold}}
-plot_folds <- function(data, folds) {
+plot_folds <- function(data, folds, colors = NULL, ...) {
   graphics::plot(data, pch=".")
   k <- max(folds)
-  cols <- grDevices::rainbow(k)
+  if(is.null(colors)) {
+    colors <- grDevices::rainbow(k)
+  }
   for(i in 1:k) {
-    graphics::text(data[folds==i,], labels = i, pch=20, col=cols[i])
+    graphics::text(data[folds==i,], labels=i, pch=20, col=colors[i])
   }
 }

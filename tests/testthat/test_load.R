@@ -51,14 +51,14 @@ test_that("list species", {
   expect_equal(colnames(species), c("species", "aphia_id"))
 })
 
-test_that("species traits", {
+test_that("species info", {
   setup_load()
 
-  traits <- species_traits()
+  info <- species_info()
   species <- list_species()[,"species"]
-  expect_gt(NROW(traits), 500)
-  expect_gt(NCOL(traits), 20)
-  expect_equal(colnames(traits[,1:5]), c("species", "aphia_id", "eol_id", "kingdom", "phylum"))
+  expect_gt(NROW(info), 500)
+  expect_gt(NCOL(info), 5)
+  expect_equal(colnames(info[,1:4]), c("species", "aphia_id", "kingdom", "phylum"))
 })
 
 

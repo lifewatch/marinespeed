@@ -11,9 +11,13 @@ plot_folds(data, folds)
 first two columns should represent the longitude and latitude (or x,y
 coordinates).}
 
-\item{folds}{NUmeric vector with group assignments from e.g.
+\item{folds}{Numeric vector with group assignments from e.g.
 \code{\link{kfold_disc}}, \code{\link{kfold_grid}} or
 \code{\link[dismo]{kfold}}.}
+
+\item{colors}{Colors to use for the different folds}
+
+\item{...}{Arguments to be passed to the plot function.}
 }
 \description{
 \code{plot_folds} makes a rudimentary plot of the data and the folds created

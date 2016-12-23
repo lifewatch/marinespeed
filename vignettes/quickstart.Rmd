@@ -37,14 +37,14 @@ The first 5 species and there aphia_id (WoRMS species id) are:
 knitr::kable(species[1:5,], row.names = FALSE)
 ```
 
-The traits data consists of species identifiers, taxonomic information from the 
+The species information consists of species identifiers, taxonomic information from the 
 World Register of Marine Species (WoRMS), a visual assessment score for the 
-amount of sampling bias and the most common traits from the Encyclopedia of Life.
+amount of sampling bias and the covered latitudinal zones.
 
 ```{r}
-# all species traits
-traits <- species_traits()
-colnames(traits)
+# all species information
+info <- species_info()
+colnames(info)
 ```
 
 ## Looping over all species data

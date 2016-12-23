@@ -36,7 +36,7 @@ are calculated else if \code{FALSE} Euclidean (planar) distances are
 calculated.}
 
 \item{background_buffer}{Positive numeric. Distance in meters around species
-test points where background data should be excluded from. Use \code{NA} or
+test points where training background data should be excluded from. Use \code{NA} or
 a negative number to disable background point filtering.}
 }
 \value{
