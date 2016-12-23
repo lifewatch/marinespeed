@@ -365,7 +365,7 @@ kfold_grid <- function(data, k = 4, lonlat = TRUE) {
 #' \code{plot_folds} makes a rudimentary plot of the data and the folds created
 #' with e.g. \code{\link{kfold_disc}} or \code{\link[dismo]{kfold}}.
 #'
-#' @usage plot_folds(data, folds)
+#' @usage plot_folds(data, folds, colors, ...)
 #'
 #' @param data Matrix or dataframe. Data for which the folds where created. The
 #'   first two columns should represent the longitude and latitude (or x,y

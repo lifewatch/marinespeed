@@ -4,7 +4,7 @@
 \alias{plot_folds}
 \title{plot folds}
 \usage{
-plot_folds(data, folds)
+plot_folds(data, folds, colors, ...)
 }
 \arguments{
 \item{data}{Matrix or dataframe. Data for which the folds where created. The
