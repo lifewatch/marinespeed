@@ -3,7 +3,7 @@ Type: Package
 Title: Benchmark Data Sets and Functions for Marine Species Distribution
     Modelling
 Version: 0.1.0
-Date: 2016-09-24
+Date: 2016-02-13
 Depends:
     R (>= 3.2.5)
 Imports:

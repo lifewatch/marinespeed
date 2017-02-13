@@ -5,7 +5,8 @@ context("lapply")
 skip <- function() {
   skip_on_cran()
   # skip_on_travis()
-  options(marinespeed_datadir = "~/R/marinespeed")
+  test_dir <- file.path(tempdir(), "marinespeed")
+  options(marinespeed_datadir = test_dir)
 }
 
 test_that("lapply_species works", {

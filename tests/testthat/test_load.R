@@ -4,8 +4,9 @@ context("load")
 
 setup_load <- function() {
   skip_on_cran()
-  options(marinespeed_datadir = "~/R/marinespeed")
   # skip_on_travis()
+  test_dir <- file.path(tempdir(), "marinespeed")
+  options(marinespeed_datadir = test_dir)
 }
 
 test_that("get datadir", {
@@ -209,7 +210,7 @@ test_that("get_folds works", {
 test_that("get_background works", {
   setup_load()
   check_background <- function(bg) {
-    expect_gt(NCOL(bg), 50)
+    expect_equal(NCOL(bg), 71)
     expect_gt(NROW(bg), 1000)
   }
   check_background(get_background("random"))
