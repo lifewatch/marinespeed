@@ -1,6 +1,6 @@
 ## Test environments
 * Windows 7, R 3.2.5
-* Ubuntu 14.04 (on travis-ci), R 3.3.1
+* Ubuntu 12.04.5 LTS (on travis-ci.org), R 3.3.2
 * win-builder (devel and release)
  
 ## R CMD check results
