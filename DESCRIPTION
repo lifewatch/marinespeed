@@ -2,7 +2,7 @@ Package: marinespeed
 Type: Package
 Title: Benchmark Data Sets and Functions for Marine Species Distribution
     Modelling
-Version: 0.1.0
+Version: 0.1.0.9001
 Date: 2017-02-16
 Depends:
     R (>= 3.2.5)
@@ -18,8 +18,8 @@ Authors@R: person("Samuel", "Bosch", email = "mail@samuelbosch.com", role = c("a
 Description: A collection of marine species benchmark data sets and functions
     for species distribution modelling (ecological niche modelling).
 License: GPL (>= 3)
-URL: http://www.samuelbosch.com/p/marinespeed.html
-BugReports: https://github.com/samuelbosch/marinespeed/issues
+URL: http://marinespeed.org
+BugReports: https://github.com/lifewatch/marinespeed/issues
 LazyData: TRUE
 Suggests:
     biomod2,
