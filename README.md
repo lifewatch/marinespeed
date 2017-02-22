@@ -1,6 +1,7 @@
 [![MIT License](https://img.shields.io/github/license/samuelbosch/blogbits.svg)](https://github.com/samuelbosch/marinespeed/blob/master/LICENSE.md)
 [![Build Status](https://travis-ci.org/samuelbosch/marinespeed.svg?branch=master)](https://travis-ci.org/samuelbosch/marinespeed)
 [![Coverage Status](http://codecov.io/github/samuelbosch/marinespeed/coverage.svg?branch=master)](http://codecov.io/github/samuelbosch/marinespeed?branch=master)
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/marinespeed)](https://CRAN.R-project.org/package=marinespeed)
 
 # MarineSPEED
 R code for downloading and working with the Marine SPEcies and Environmental Data ([MarineSPEED.org](http://MarineSPEED.org)) benchmark dataset.
