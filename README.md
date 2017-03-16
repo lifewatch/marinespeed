@@ -7,8 +7,9 @@
 R code for downloading and working with the Marine SPEcies and Environmental Data ([MarineSPEED.org](http://MarineSPEED.org)) benchmark dataset.
 
 Installation:
-
-    devtools::install_github("samuelbosch/marinespeed")
+    install.packages("marinespeed")
+    # or 
+    devtools::install_github("lifewatch/marinespeed")
     
 Example usage:
 
