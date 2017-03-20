@@ -15,11 +15,9 @@ Imports:
     sp,
     bit
 Authors@R: c(
-    person("Samuel", "Bosch", email = "mail@samuelbosch.com", role = c("aut", "cre", "prg", "cur", "gis")),
-    person("Lennert", "Tyberghein", email = "lennert.tyberghein@vliz.be", role = c("ctb", "wst")),
-    person("Klaas", "Deneudt", email = "klaas.deneudt@vliz.be", role = c("fnd")),
-    person("Francisco", "Hernandez", email = "francisco.hernandez@vliz.be", role = c("fnd")),
-    person("Olivier", "De Clerck", email = "olivier.declerck@ugent.be", role = c("ctb", "cur", "wst")))
+    person("Samuel", "Bosch", email = "mail@samuelbosch.com", role = c("aut", "cre")),
+    person("Lennert", "Tyberghein", email = "lennert.tyberghein@vliz.be", role = c("ctb")),
+    person("Olivier", "De Clerck", email = "olivier.declerck@ugent.be", role = c("ctb")))
 Description: A collection of marine species benchmark data sets and functions
     for species distribution modelling (ecological niche modelling).
 License: GPL (>= 3)
