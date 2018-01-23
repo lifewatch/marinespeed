@@ -7,15 +7,19 @@
 R code for downloading and working with the Marine SPEcies and Environmental Data ([MarineSPEED.org](http://MarineSPEED.org)) benchmark dataset.
 
 Installation:
+
+```R
     install.packages("marinespeed")
     # or 
-    devtools::install_github("lifewatch/marinespeed")
-    
+    devtools::install_github("lifewatch/marinespeed")
+```
+
 Example usage:
 
-    library(marinespeed)
+```R
+    library(marinespeed)
     
-    ## list of all species
+    ## get species list
     species <- list_species()
     View(species)
     
@@ -39,4 +43,5 @@ Example usage:
     # for the first 10 species
     species <- list_species()
     lapply_kfold_species(plot_occurrences, species=species[1:10,],
-                         fold_type = "disc", k = 1:2)
+                         fold_type = "disc", k = 1:2)
+```
