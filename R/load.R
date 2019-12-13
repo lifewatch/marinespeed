@@ -206,7 +206,7 @@ get_datadir <- function() {
   datadir <- getOption("marinespeed_datadir")
   if(is.null(datadir)) {
     datadir <- file.path(tempdir(), "marinespeed")
-    warning("file.path(tempdir(), \"marinespeed\") will be used as datadir, set options(marinespeed_datadir=\"<directory>\") to avoid re-downloading the data in every session")
+    print("file.path(tempdir(), \"marinespeed\") will be used as datadir, set options(marinespeed_datadir=\"<directory>\") to avoid re-downloading the data in every session")
   }
   datadir <- file.path(datadir, get_version())
   if(!dir.exists(datadir)) {
@@ -224,8 +224,11 @@ get_file <- function(filename) {
     root <- paste0("http://marinespeed.samuelbosch.com/", get_version(), "/")
     ok <- -1
     tryCatch({
-      ok <- utils::download.file(paste0(root, filename), outfile, mode="wb")
+      suppressWarnings({ ok <- utils::download.file(paste0(root, filename), outfile, mode="wb") })
     }, finally = {
+      if(ok != 0) {
+        print(paste("failed to download", filename))
+      }
       if(ok != 0 && file.exists(outfile)) {
         file.remove(outfile)
       }
